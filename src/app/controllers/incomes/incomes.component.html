@@ -1,0 +1,107 @@
+<section>
+    <div class="card">
+        <partial-table [_values]="this._incomes">
+            <ng-template #caption>
+                <div class="buttons">
+                    <h2>Historial</h2>
+                    <button type="button" class="btn success" (click)="this.openModal()">Agregar ingreso</button>
+                </div>
+            </ng-template>
+            <ng-template #header>
+                <tr>
+                    <th>Categoría</th>
+                    <th>Nombre</th>
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th>Creación</th>
+                    <th>OPC</th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-item>
+                <tr>
+                    <td>{{item.categoryName}}</td>
+                    <td>{{item.name}}</td>
+                    <td>${{this._genericService.convertToCurrencyFormat(item.amount).data}}</td>
+                    <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                    <td>{{item.description}}</td>
+                    <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                    <td>
+                        <div class="operations">
+                            <button type="button" class="btn success" title="Editar" (click)="this.openModal(item)">
+                                <i class="pi pi-pencil"></i>
+                            </button>  
+                            <button type="button" class="btn danger" title="Eliminar" (click)="this.modalOpenDelete(item)">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template #footer>
+                <button type="button" class="btn success" (click)="this.openModal()">Agregar ingreso</button>
+            </ng-template>
+        </partial-table>
+        TOTAL: ${{this._genericService.convertToCurrencyFormat(this.getTotal()).data}}
+    </div>
+
+    <div class="card">
+        <div id="container"></div>
+    </div>
+</section>
+
+@if(this._modals.income && this._form !== null) {
+<form [formGroup]="this._form" (ngSubmit)="this.submitForm(this._form)">
+    <partial-modal (eventCloseModal)="this.closeModal()">
+        <ng-template #header>
+            <h2>{{this._form.get('opcLabel')?.value}} ingreso</h2>
+        </ng-template>
+        <ng-template #body>
+            <div class="form">
+                <div class="form-group">
+                    <label for="name">Nombre</label>
+                    <input type="text" formControlName="name" id="name" name="name" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Cantidad</label>
+                    <partial-inputnumber formControlName="amount" autocomplete="off"></partial-inputnumber>
+                    <!-- <input type="number" formControlName="amount" id="amount" name="amount" required> -->
+                </div>
+                <div class="form-group">
+                    <label for="date">Fecha</label>
+                    <input type="date" formControlName="date" id="date" name="date" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Categoría</label>
+                    <select formControlName="categoryId" id="category" name="category" required>
+                        @for (item of this._categories; track $index) {
+                        <option [value]="item.categoryId">{{item.name}}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Descripción</label>
+                    <textarea formControlName="description" id="description" name="description"
+                        autocomplete="off"></textarea>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template #footer>
+            <div class="footer">
+                <button type="submit" class="btn success" [disabled]="this._form.invalid">{{this._form.get('opcLabel')?.value}}</button>
+            </div>
+        </ng-template>
+    </partial-modal>
+</form>
+}
+
+@if(this._modals.deleteIncome && this._selectedIncome !== null) {
+    <partial-modalconfirmation (eventOnSuccess)="this.onDelete(this._selectedIncome)" (eventOnCancel)="this._modals.deleteIncome = false; this._selectedIncome = null;">
+        <ng-template #header>
+            <h2>Eliminar ingreso</h2>
+        </ng-template>
+        <ng-template #body>
+            <h4>¿Está seguro de que desea eliminar el ingreso <b>{{this._selectedIncome.name}}</b>?</h4>
+        </ng-template>
+    </partial-modalconfirmation>
+}

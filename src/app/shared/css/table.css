@@ -1,0 +1,55 @@
+partial-table {
+    .container {
+        width: 100%;
+        display: grid;
+
+        .caption {
+            padding: 10px;
+        }
+
+        .body {
+            overflow: auto;
+            max-height: 400px;
+
+            table {
+                background-color: var(--color-black);
+                border: 1px solid var(--color-black-border);
+                min-width: 100%;
+                border-spacing: 0; /* Elimina el espacio entre las celdas */
+                border-collapse: collapse; /* Hace que las celdas compartan bordes */
+                position: relative;
+            
+                thead {
+                    background-color: var(--color-black);
+                    position: sticky;
+                    top: -1px;
+    
+                    tr {
+                        th {
+                            padding: 10px;
+                            text-align: left;
+                            word-break: break-word;
+                            overflow-wrap: break-word;
+                        }
+                    }
+                }
+            
+                tbody {
+                    tr {
+                        &:nth-child(odd) {
+                            background-color: var(--color-black-weight);
+                        }
+                        
+                        td {
+                            padding: 10px;
+                            text-align: left;
+                            word-break: break-word;
+                            overflow-wrap: break-word;
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+}

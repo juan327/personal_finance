@@ -1,0 +1,10 @@
+.app {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    min-height: 100dvh;
+    padding: 10px 20px;
+    gap: 20px;
+    background-color: var(--color-background);
+    color: #fff;
+}

@@ -1,0 +1,21 @@
+
+<div class="content-modal">
+    <div class="modal">
+        <div class="header">
+            <div class="tile">
+                <ng-container *ngTemplateOutlet="this.templateHeader"></ng-container>
+            </div>
+            <i class="close pi pi-times" (click)="this.closeModal()"></i>
+        </div>
+        <hr>
+        <div class="body">
+            <ng-container *ngTemplateOutlet="this.templateBody"></ng-container>
+        </div>
+        @if(this.templateFooter) {
+            <hr>
+            <div class="footer">
+                <ng-container *ngTemplateOutlet="this.templateFooter"></ng-container>
+            </div>
+        }
+    </div>
+</div>

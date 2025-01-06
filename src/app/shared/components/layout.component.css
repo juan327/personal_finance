@@ -1,0 +1,42 @@
+nav {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    ul {
+        display: inline-flex;
+        background-color: var(--color-black-border);
+        padding: 7px;
+        border-radius: 5px;
+
+        li {
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+            font-size: 1.3rem;
+
+            a {
+                padding: 5px 20px;
+                color: var(--color-black-text);
+                text-decoration: none;
+                display: block;
+            }
+
+            &:hover {
+                background-color: #3e3e3e;
+            }
+
+            &.active {
+                background-color: var(--color-black);
+                font-weight: 700;
+                a{
+                    color: #fff;
+                }
+            }
+        }
+    }
+}

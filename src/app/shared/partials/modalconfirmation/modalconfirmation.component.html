@@ -1,0 +1,20 @@
+
+<div class="content-modal">
+    <div class="modal">
+        <div class="header">
+            <div class="title">
+                <ng-container *ngTemplateOutlet="this.templateHeader"></ng-container>
+            </div>
+            <i class="close pi pi-times" (click)="this.closeModal()"></i>
+        </div>
+        <hr>
+        <div class="body">
+            <ng-container *ngTemplateOutlet="this.templateBody"></ng-container>
+        </div>
+        <hr>
+        <div class="footer">
+            <button type="button" class="btn danger" (click)="this.onCancel()">NO</button>
+            <button type="button" class="btn success" (click)="this.onSuccess()">SI</button>
+        </div>
+    </div>
+</div>

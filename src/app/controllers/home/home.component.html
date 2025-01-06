@@ -1,0 +1,52 @@
+<section>
+    <div class="card">
+        <span class="title">Balance total</span>
+        <h3 class="balance">${{this._results.total}}</h3>
+        <span class="comment">+20.1% del mes pasado</span>
+    </div>
+    <div class="card">
+        <span class="title">Ingresos del Mes</span>
+        <h3 class="balance">${{this._results.totalIncomes}}</h3>
+        <span class="comment">+8.2% del mes pasado</span>
+    </div>
+    <div class="card">
+        <span class="title">Gastos del Mes</span>
+        <h3 class="balance">${{this._results.totalExpenses}}</h3>
+        <span class="comment">-4.5% del mes pasado</span>
+    </div>
+    <div class="card">
+        <span class="title">Rendimiento</span>
+        <h3 class="balance">+18.2%</h3>
+        <span class="comment">+4.1% del mes pasado</span>
+    </div>
+    <div class="card">
+        <div id="container"></div>
+    </div>
+    <div class="card">
+        <partial-table [_values]="this._transactions">
+            <ng-template #caption>
+                <h2>Ultimos movimientos</h2>
+            </ng-template>
+            <ng-template #header>
+                <tr>
+                    <th>Categoría</th>
+                    <th>Nombre</th>
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th>Creación</th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-item>
+                <tr>
+                    <td>{{item.categoryName}}</td>
+                    <td>{{item.name}}</td>
+                    <td>${{this._genericService.convertToCurrencyFormat(item.amount).data}}</td>
+                    <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                    <td>{{item.description}}</td>
+                    <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                </tr>
+            </ng-template>
+        </partial-table>
+    </div>
+</section>

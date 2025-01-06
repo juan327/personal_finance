@@ -1,0 +1,83 @@
+<section>
+    <div class="card">
+        <partial-table [_values]="this._incomes">
+            <ng-template #caption>
+                <div class="buttons">
+                    <h2>Historial</h2>
+                    <button type="button" class="btn success" (click)="this.openModal()">Agregar gasto</button>
+                </div>
+            </ng-template>
+            <ng-template #header>
+                <tr>
+                    <th>Categoría</th>
+                    <th>Nombre</th>
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th>Creación</th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-item>
+                <tr>
+                    <td>{{item.categoryName}}</td>
+                    <td>{{item.name}}</td>
+                    <td>${{this._genericService.convertToCurrencyFormat(item.amount).data}}</td>
+                    <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                    <td>{{item.description}}</td>
+                    <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                </tr>
+            </ng-template>
+            <ng-template #footer>
+                <button type="button" class="btn success" (click)="this.openModal()">Agregar ingreso</button>
+            </ng-template>
+        </partial-table>
+        TOTAL: ${{this._genericService.convertToCurrencyFormat(this.getTotal()).data}}
+    </div>
+
+    <div class="card">
+        <div id="container"></div>
+    </div>
+</section>
+
+@if(this._modals.income && this._form !== null) {
+<form [formGroup]="this._form" (ngSubmit)="this.submitForm(this._form)">
+    <partial-modal (eventCloseModal)="this.closeModal()">
+        <ng-template #header>
+            <h2>Agregar gasto</h2>
+        </ng-template>
+        <ng-template #body>
+            <div class="form">
+                <div class="form-group">
+                    <label for="name">Nombre</label>
+                    <input type="text" formControlName="name" id="name" name="name" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Cantidad</label>
+                    <partial-inputnumber formControlName="amount" autocomplete="off"></partial-inputnumber>
+                    <!-- <input type="number" formControlName="amount" id="amount" name="amount" required> -->
+                </div>
+                <div class="form-group">
+                    <label for="date">Fecha</label>
+                    <input type="date" formControlName="date" id="date" name="date" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Categoría</label>
+                    <select formControlName="categoryId" id="category" name="category" required>
+                        @for (item of this._categories; track $index) {
+                        <option [value]="item.categoryId">{{item.name}}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Descripción</label>
+                    <textarea formControlName="description" id="description" name="description"
+                        autocomplete="off"></textarea>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template #footer>
+            <button type="submit" class="btn success" [disabled]="this._form.invalid">Agregar</button>
+        </ng-template>
+    </partial-modal>
+</form>
+}
