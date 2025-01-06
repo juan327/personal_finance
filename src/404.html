@@ -1,8 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="refresh" content="0; URL=./index.html">
+  <meta charset="UTF-8">
+  <title>Redirigiendo...</title>
+  <script>
+    // Redirige a index.html preservando la ruta original
+    const currentPath = window.location.pathname;
+    const newUrl = '/' + currentPath.substring(currentPath.indexOf('/') + 1);
+    window.location.href = newUrl;
+  </script>
 </head>
 <body>
+  <p>Redirigiendo...</p>
 </body>
 </html>
