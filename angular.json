@@ -26,7 +26,8 @@
                 "input": "public"
               },
               "src/assets",
-              "src/.htaccess"
+              "src/.htaccess",
+              "src/404.html"
             ],
             "styles": [
               "src/styles.css"
@@ -86,7 +87,8 @@
                 "input": "public"
               },
               "src/assets",
-              "src/.htaccess"
+              "src/.htaccess",
+              "src/404.html"
             ],
             "styles": [
               "src/styles.css"

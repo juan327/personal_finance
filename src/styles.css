@@ -44,13 +44,6 @@ button.btn {
         &:hover {
             background-color: var(--color-green-light);
         }
-
-        &:disabled {
-            background-color: var(--color-black-border);
-            border: 1px solid var(--color-black);
-            color: var(--color-black-text);
-            cursor: not-allowed;
-        }
     }
 
     &.danger {
@@ -60,12 +53,16 @@ button.btn {
         &:hover {
             background-color: var(--color-red-light);
         }
+    }
 
-        &:disabled {
+    &:disabled {
+        background-color: var(--color-black-border);
+        border: 1px solid var(--color-black);
+        color: var(--color-black-text);
+        cursor: not-allowed;
+
+        &:hover {
             background-color: var(--color-black-border);
-            border: 1px solid var(--color-black);
-            color: var(--color-black-text);
-            cursor: not-allowed;
         }
     }
 }
@@ -79,5 +76,21 @@ textarea {
 
     svg {
         width: 100% !important;
+    }
+}
+    
+input, textarea, select {
+    padding: 10px;
+    border-radius: 5px;
+    background-color: var(--color-black-weight);
+    border: 1px solid var(--color-black-border);
+    color: #fff;
+    font-size: 1.1rem;
+    transition: border 0.3s ease;
+    width: 100%;
+
+    &:focus {
+        outline: none;
+        border: 1px solid #fff;
     }
 }

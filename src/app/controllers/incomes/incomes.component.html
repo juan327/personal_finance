@@ -1,6 +1,6 @@
 <section>
     <div class="card">
-        <partial-table [_values]="this._incomes">
+        <partial-table [_values]="this._incomes" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">
             <ng-template #caption>
                 <div class="buttons">
                     <h2>Historial</h2>

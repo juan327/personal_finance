@@ -49,6 +49,13 @@ export class IncomesComponent implements OnInit {
 
   public chart: Chart | null = null;
   private readonly _categoryType: number = 1;
+  public _options: {
+    skip: number;
+    take: number;
+  } = {
+      skip: 0,
+      take: 5,
+    };
 
   ngOnInit(): void {
     this._indexeddbService.getAllItems<CategoryEntity>('categories', 'name', 'asc').then(response => {
@@ -71,7 +78,8 @@ export class IncomesComponent implements OnInit {
   }
 
   public loadTable(): void {
-    this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
+    console.log('loadTable', this._options);
+    this._indexeddbService.getListPagination<TransactionEntity>('transactions', this._options.skip, this._options.take, 'created', 'desc').then(response => {
       if(response.length > 0) {
         this._incomes = response.filter(c=>c.category.type === this._categoryType).map((item: TransactionEntity) => {
           const objReturn: DTOTransaction = {
@@ -253,6 +261,16 @@ export class IncomesComponent implements OnInit {
         }
       ] : [],
     };
+  }
+
+  public loadPartialTable(item: any): void {
+    this._options = item;
+    this.loadTable();
+  }
+
+  public changePartialTable(item: number): void {
+    this._options.take = item;
+    this.loadTable();
   }
 
 }

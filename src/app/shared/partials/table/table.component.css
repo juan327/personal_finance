@@ -1,0 +1,47 @@
+.footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+
+        .numeration {
+            display: flex;
+            gap: 5px;
+        }
+
+        button {
+            background-color: var(--color-black);
+            color: #fff;
+            border: 0;
+            border-radius: 150px;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 0.9rem;
+            color: var(--color-black-text);
+
+            &:hover {
+                background-color: var(--color-black-border);
+            }
+
+            &.active {
+                background-color: #FAFAFA;
+                color: var(--color-black-weight);
+            }
+        }
+    }
+
+    .selector {
+        select {
+            padding: 5px;
+            font-size: 0.9rem;
+        }
+    }   
+}

@@ -14,4 +14,34 @@
             </tbody>
         </table>
     </div>
+    <div class="footer">
+        <div class="pagination">
+            <button type="button">
+                <i class="pi pi-angle-double-left"></i>
+            </button>
+            <button type="button">
+                <i class="pi pi-angle-left"></i>
+            </button>
+
+            <button type="button" class="active">1</button>
+            <button type="button">2</button>
+            <button type="button">3</button>
+            <button type="button">4</button>
+            <button type="button">5</button>
+
+            <button type="button">
+                <i class="pi pi-angle-right"></i>
+            </button>
+            <button type="button">
+                <i class="pi pi-angle-double-right"></i>
+            </button>
+        </div>
+        <div class="selector">
+            <select (change)="this.selectTake($event)">
+                @for (item of this._listTake; track $index) {
+                    <option [value]="item">{{item}}</option>
+                }
+            </select>
+        </div>
+    </div>
 </div>

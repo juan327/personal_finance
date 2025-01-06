@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class IndexeddbService {
-  private readonly dbName = 'DataBase';
+  private readonly dbName = 'personal_finance';
 
   constructor() {
   }
@@ -70,6 +70,41 @@ export class IndexeddbService {
           });
   
           resolve(items);
+        };
+
+        //getAllRequest.onsuccess = () => resolve(getAllRequest.result);
+        getAllRequest.onerror = () => reject(getAllRequest.error);
+      };
+
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  public getListPagination<T>(tableName: string, skip: number, take: number, orderBy: string, sortOrder: 'asc' | 'desc' = 'asc'): Promise<T[]> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName);
+
+      request.onsuccess = (event: any) => {
+        const db = event.target.result;
+        const transaction = db.transaction([tableName], 'readonly');
+        const store = transaction.objectStore(tableName);
+        const direction = sortOrder === 'asc' ? 'next' : 'prev';
+        const getAllRequest = store.openCursor(null, direction);
+  
+        const items: T[] = [];
+        let index = 0;
+  
+        getAllRequest.onsuccess = (event: any) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            if (index >= skip && items.length < take) {
+              items.push(cursor.value);
+            }
+            index++;
+            cursor.continue();
+          } else {
+            resolve(items);
+          }
         };
 
         //getAllRequest.onsuccess = () => resolve(getAllRequest.result);

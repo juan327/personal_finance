@@ -1,4 +1,4 @@
-import { Component, ContentChild, EventEmitter, inject, Input, OnInit, Output, TemplateRef } from '@angular/core';
+import { Component, ContentChild, EventEmitter, inject, input, Input, OnInit, Output, TemplateRef } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -11,27 +11,42 @@ import { CommonModule } from '@angular/common';
 })
 
 export class TableComponent implements OnInit {
-    constructor() {}
+  constructor() { }
 
-    @ContentChild('caption') templateCaption!: TemplateRef<any>;
-    @ContentChild('header') templateHeader!: TemplateRef<any>;
-    @ContentChild('body') templateBody!: TemplateRef<any>;
-    @ContentChild('footer') templateFooter!: TemplateRef<any>;
+  @ContentChild('caption') templateCaption!: TemplateRef<any>;
+  @ContentChild('header') templateHeader!: TemplateRef<any>;
+  @ContentChild('body') templateBody!: TemplateRef<any>;
+  @ContentChild('footer') templateFooter!: TemplateRef<any>;
 
-    @Output() public readonly eventCloseModal = new EventEmitter<any>();
-    @Input() public _values: any[] = []; 
-    
-    ngOnInit(): void {
-    }
+  @Output() public readonly eventOnChange = new EventEmitter<number>();
+  @Output() public readonly eventOnLoad = new EventEmitter<any>();
+  
+  @Input() public _values: any[] = [];
+  @Input() public _options: {
+    skip: number;
+    take: number;
+  } = {
+      skip: 0,
+      take: 5,
+    };
 
-    ngAfterViewInit(): void {
-    }
+  public readonly _listTake: number[] = [5, 10, 20, 50];
+  public _selectedTake: number = 5;
 
-    ngAfterContentInit(): void {
-    }
+  ngOnInit(): void {
+  }
 
-    ngOnDestroy(): void {
+  ngAfterViewInit(): void {
+    this.eventOnLoad.emit(this._options);
+  }
 
-    }
+  ngOnDestroy(): void {
+
+  }
+  
+  public selectTake(event: any): void {
+    this._selectedTake = parseInt(event.target.value);
+    this.eventOnChange.emit(this._selectedTake);
+  }
 
 }
