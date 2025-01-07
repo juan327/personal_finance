@@ -24,15 +24,15 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     const tables = [
-      {tableName: 'categories', primaryKey: 'categoryId'},
-      {tableName: 'transactions', primaryKey: 'transactionId'},
+      {tableName: 'categories', primaryKey: 'categoryId', indexes: [{name: 'categoryId', unique: true}, {name: 'name', unique: false}, {name: 'created', unique: false}]},
+      {tableName: 'transactions', primaryKey: 'transactionId', indexes: [{name: 'transactionId', unique: true}, {name: 'name', unique: false}, {name: 'created', unique: false}]},
     ];
 
     const listTemp = ['Categoria 1', 'Categoria 2', 'Categoria 3', 'Categoria 4', 'Otros'];
     this._indexeddbService.initDB(tables);
     
     this._indexeddbService.getAllItems<CategoryEntity>('categories', 'created', 'asc').then(response => {
-      if(response.length <= 0) {
+      if(response.total <= 0) {
 
         listTemp.forEach(item => {
           this._indexeddbService.addItem<CategoryEntity>('categories', {

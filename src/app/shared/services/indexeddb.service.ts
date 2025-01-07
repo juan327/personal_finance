@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DTOResponseListPagination } from '../dto/generic';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,10 @@ export class IndexeddbService {
   public initDB(tables: {
     tableName: string,
     primaryKey: string,
+    indexes: {
+      name: string,
+      unique: boolean,
+    }[],
   }[]): void {
     const request = indexedDB.open(this.dbName, 1);
 
@@ -19,7 +24,11 @@ export class IndexeddbService {
       const db = event.target.result;
       tables.forEach(table => {
         if (!db.objectStoreNames.contains(table.tableName)) {
-          db.createObjectStore(table.tableName, { keyPath: table.primaryKey });
+          const objectStore = db.createObjectStore(table.tableName, { keyPath: table.primaryKey });
+
+          table.indexes.forEach(index => {
+            objectStore.createIndex(index.name, index.name, { unique: index.unique });
+          });
         }
       });
     };
@@ -47,71 +56,36 @@ export class IndexeddbService {
     });
   }
 
-  public getAllItems<T>(tableName: string, orderBy: string, order: 'asc' | 'desc' = 'asc'): Promise<T[]> {
+  public getAllItems<T>(tableName: string, orderBy: string, sortOrder: 'asc' | 'desc' = 'asc'): Promise<DTOResponseListPagination<T>> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName);
+      const requestDB = indexedDB.open(this.dbName);
 
-      request.onsuccess = (event: any) => {
+      requestDB.onsuccess = (event: any) => {
         const db = event.target.result;
-        const transaction = db.transaction([tableName], 'readonly');
-        const store = transaction.objectStore(tableName);
-        const getAllRequest = store.getAll();
-
-        getAllRequest.onsuccess = () => {
-          const items = getAllRequest.result;
-  
-          // Ordenar los elementos según el campo y el orden
-          items.sort((a: any, b: any) => {
-            if (order === 'asc') {
-              return a[orderBy] > b[orderBy] ? 1 : -1;
-            } else {
-              return a[orderBy] < b[orderBy] ? 1 : -1;
-            }
-          });
-  
-          resolve(items);
-        };
-
-        //getAllRequest.onsuccess = () => resolve(getAllRequest.result);
-        getAllRequest.onerror = () => reject(getAllRequest.error);
-      };
-
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  public getListPagination<T>(tableName: string, skip: number, take: number, orderBy: string, sortOrder: 'asc' | 'desc' = 'asc'): Promise<T[]> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName);
-
-      request.onsuccess = (event: any) => {
-        const db = event.target.result;
-        const transaction = db.transaction([tableName], 'readonly');
-        const store = transaction.objectStore(tableName);
+        const objectStore = db.transaction(tableName, 'readonly').objectStore(tableName);
         const direction = sortOrder === 'asc' ? 'next' : 'prev';
-        const getAllRequest = store.openCursor(null, direction);
-  
-        const items: T[] = [];
-        let index = 0;
-  
-        getAllRequest.onsuccess = (event: any) => {
+    
+        const request = objectStore.index(orderBy).openCursor(null, direction);
+    
+        const results: any[] = [];
+        request.onsuccess = (event: any) => {
           const cursor = event.target.result;
           if (cursor) {
-            if (index >= skip && items.length < take) {
-              items.push(cursor.value);
-            }
-            index++;
+            results.push(cursor.value);
             cursor.continue();
           } else {
-            resolve(items);
+            const objReturn: DTOResponseListPagination<T> = {
+              items: results,
+              total: results.length,
+            };
+            resolve(objReturn);
           }
         };
-
-        //getAllRequest.onsuccess = () => resolve(getAllRequest.result);
-        getAllRequest.onerror = () => reject(getAllRequest.error);
+    
+        request.onerror = (event: any) => reject(event.target.error);
       };
 
-      request.onerror = () => reject(request.error);
+      requestDB.onerror = () => reject(requestDB.error);
     });
   }
 

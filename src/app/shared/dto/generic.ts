@@ -14,3 +14,8 @@ export interface DTOHighchartSeries<T> {
     name: string;
     data: T[];
 }
+
+export interface DTOResponseListPagination<T> {
+    items: T[];
+    total: number;
+}

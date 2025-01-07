@@ -1,6 +1,6 @@
 <section>
     <div class="card">
-        <partial-table [_values]="this._incomes">
+        <partial-table [_values]="this._incomes" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">
             <ng-template #caption>
                 <div class="buttons">
                     <h2>Historial</h2>
@@ -15,6 +15,7 @@
                     <th>Fecha</th>
                     <th>Descripción</th>
                     <th>Creación</th>
+                    <th>OPC</th>
                 </tr>
             </ng-template>
             <ng-template #body let-item>
@@ -25,10 +26,20 @@
                     <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
                     <td>{{item.description}}</td>
                     <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                    <td>
+                        <div class="operations">
+                            <button type="button" class="btn primary" title="Editar" (click)="this.openModal(item)">
+                                <i class="pi pi-pen-to-square"></i>
+                            </button>  
+                            <button type="button" class="btn danger" title="Eliminar" (click)="this.modalOpenDelete(item)">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             </ng-template>
             <ng-template #footer>
-                <button type="button" class="btn success" (click)="this.openModal()">Agregar ingreso</button>
+                <button type="button" class="btn success" (click)="this.openModal()">Agregar gasto</button>
             </ng-template>
         </partial-table>
         TOTAL: ${{this._genericService.convertToCurrencyFormat(this.getTotal()).data}}
@@ -43,7 +54,7 @@
 <form [formGroup]="this._form" (ngSubmit)="this.submitForm(this._form)">
     <partial-modal (eventCloseModal)="this.closeModal()">
         <ng-template #header>
-            <h2>Agregar gasto</h2>
+            <h2>{{this._form.get('opcLabel')?.value}} gasto</h2>
         </ng-template>
         <ng-template #body>
             <div class="form">
@@ -76,8 +87,21 @@
             </div>
         </ng-template>
         <ng-template #footer>
-            <button type="submit" class="btn success" [disabled]="this._form.invalid">Agregar</button>
+            <div class="footer">
+                <button type="submit" class="btn success" [disabled]="this._form.invalid">{{this._form.get('opcLabel')?.value}}</button>
+            </div>
         </ng-template>
     </partial-modal>
 </form>
+}
+
+@if(this._modals.deleteIncome && this._selectedIncome !== null) {
+    <partial-modalconfirmation (eventOnSuccess)="this.onDelete(this._selectedIncome)" (eventOnCancel)="this._modals.deleteIncome = false; this._selectedIncome = null;">
+        <ng-template #header>
+            <h2>Eliminar gasto</h2>
+        </ng-template>
+        <ng-template #body>
+            <h4>¿Está seguro de que desea eliminar el gasto <b>{{this._selectedIncome.name}}</b>?</h4>
+        </ng-template>
+    </partial-modalconfirmation>
 }

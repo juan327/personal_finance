@@ -37,6 +37,19 @@ section {
                 color: var(--color-black-text);
             }
         }
+
+        .operations {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1px;
+        
+            button {
+                padding: 5px 10px;
+                font-size: 0.8rem !important;
+            }
+        }
     }
 
 }
@@ -57,5 +70,10 @@ form {
             }
             
         }
+    }
+
+    .footer {
+        display: flex;
+        justify-content: flex-end;
     }
 }

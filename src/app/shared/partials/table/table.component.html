@@ -2,46 +2,54 @@
     <div class="caption">
         <ng-container *ngTemplateOutlet="this.templateCaption"></ng-container>
     </div>
+    <div class="filter">
+        <input type="text" placeholder="Busqueda rapida..." (input)="this.search($event)">
+    </div>
+    <div class="header">
+        <ng-container *ngTemplateOutlet="Template_Pagination"></ng-container>
+    </div>
     <div class="body">
         <table>
             <thead>
                 <ng-container *ngTemplateOutlet="this.templateHeader"></ng-container>
             </thead>
             <tbody>
-                @for (item of this._values; track $index) {
+                @for (item of this._valuesView; track $index) {
                     <ng-container *ngTemplateOutlet="this.templateBody; context: { $implicit: item }"></ng-container>
                 }
             </tbody>
         </table>
     </div>
     <div class="footer">
-        <div class="pagination">
-            <button type="button">
-                <i class="pi pi-angle-double-left"></i>
-            </button>
-            <button type="button">
-                <i class="pi pi-angle-left"></i>
-            </button>
-
-            <button type="button" class="active">1</button>
-            <button type="button">2</button>
-            <button type="button">3</button>
-            <button type="button">4</button>
-            <button type="button">5</button>
-
-            <button type="button">
-                <i class="pi pi-angle-right"></i>
-            </button>
-            <button type="button">
-                <i class="pi pi-angle-double-right"></i>
-            </button>
-        </div>
-        <div class="selector">
-            <select (change)="this.selectTake($event)">
-                @for (item of this._listTake; track $index) {
-                    <option [value]="item">{{item}}</option>
-                }
-            </select>
-        </div>
+        <ng-container *ngTemplateOutlet="Template_Pagination"></ng-container>
     </div>
 </div>
+
+<ng-template #Template_Pagination>
+    <div class="pagination">
+        <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(1)">
+            <i class="pi pi-angle-double-left"></i>
+        </button>
+        <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(this._actualPage - 1)">
+            <i class="pi pi-angle-left"></i>
+        </button>
+
+        @for (item of this._listPages; track $index) {
+            <button type="button" [class.active]="this._actualPage == item" (click)="this.changePage(item)">{{item}}</button>
+        }
+
+        <button type="button" [disabled]="this._actualPage == this._totalPages" (click)="this.changePage(this._actualPage + 1)">
+            <i class="pi pi-angle-right"></i>
+        </button>
+        <button type="button" [disabled]="this._actualPage == this._totalPages" (click)="this.changePage(this._totalPages)">
+            <i class="pi pi-angle-double-right"></i>
+        </button>
+    </div>
+    <div class="selector">
+        <select (change)="this.selectTake($event)">
+            @for (item of this._listTake; track item.value) {
+                <option [value]="item.value" [selected]="this._options.take == item.value">{{item.label}}</option>
+            }
+        </select>
+    </div>
+</ng-template>

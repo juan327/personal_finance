@@ -14,6 +14,7 @@ import { darkTheme } from 'src/app/shared/themes/highcharts/highcharts.dark.them
 import { DTOHighchartSeries } from 'src/app/shared/dto/generic';
 import { IndexeddbService } from 'src/app/shared/services/indexeddb.service';
 import { TableComponent } from 'src/app/shared/partials/table/table.component';
+import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTable';
 Highcharts.setOptions(darkTheme); // Aplica el tema
 
 @Component({
@@ -47,14 +48,31 @@ export class HomeComponent implements OnInit {
       totalExpenses: '0',
       total: '0',
     };
+  public _options: DTOPartialTableOptions = {
+    search: '',
+    skip: 0,
+    take: 5,
+    total: 0,
+  };
 
   public chart: Chart | null = null;
 
   ngOnInit(): void {
+    this.loadTable();
+  }
+
+  ngAfterViewInit(): void {
+  }
+
+  ngOnDestroy(): void {
+
+  }
+
+  private loadTable(): void {
     this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
-      if (response.length > 0) {
-        this._transactions = response.map((item: TransactionEntity) => {
-          console.log(item);
+      if (response.total > 0) {
+        this._options.total = response.total;
+        this._transactions = response.items.map((item: TransactionEntity) => {
           const objReturn: DTOTransaction = {
             transactionId: item.transactionId,
             name: item.name,
@@ -71,18 +89,14 @@ export class HomeComponent implements OnInit {
       }
 
       const options: Highcharts.Options = this.getChartOptions();
-      this.chart = this._highchartService.buildChart('container', options);
-      this.updateResults();
+      if (this._transactions.length > 1 && this.chart !== null) {
+        this._highchartService.updateChart(this.chart, options);
+      } else {
+        this.chart = this._highchartService.buildChart('container', options);
+      }
     }, error => {
       console.error(error);
     });
-  }
-
-  ngAfterViewInit(): void {
-  }
-
-  ngOnDestroy(): void {
-
   }
 
   public updateResults(): void {
@@ -126,7 +140,6 @@ export class HomeComponent implements OnInit {
     }[] = [];
 
     const categories = this._genericService.getMonthsFromYear(2025);
-    console.log(this._transactions);
 
     for (let i = 0; i < categories.length; i++) {
       const item = categories[i];
@@ -197,6 +210,16 @@ export class HomeComponent implements OnInit {
       },
       series: series as any
     };
+  }
+
+  public loadPartialTable(item: DTOPartialTableOptions): void {
+    this._options = item;
+    this.loadTable();
+  }
+
+  public changePartialTable(item: DTOPartialTableOptions): void {
+    this._options = item;
+    this.loadTable();
   }
 
 }

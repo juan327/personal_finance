@@ -19,6 +19,7 @@ import { darkTheme } from 'src/app/shared/themes/highcharts/highcharts.dark.them
 import { IndexeddbService } from 'src/app/shared/services/indexeddb.service';
 import { TableComponent } from 'src/app/shared/partials/table/table.component';
 import { ModalConfirmationComponent } from 'src/app/shared/partials/modalconfirmation/modalconfirmation.component';
+import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTable';
 Highcharts.setOptions(darkTheme); // Aplica el tema
 
 @Component({
@@ -49,18 +50,17 @@ export class IncomesComponent implements OnInit {
 
   public chart: Chart | null = null;
   private readonly _categoryType: number = 1;
-  public _options: {
-    skip: number;
-    take: number;
-  } = {
-      skip: 0,
-      take: 5,
-    };
+  public _options: DTOPartialTableOptions = {
+    search: '',
+    skip: 0,
+    take: 5,
+    total: 0,
+  };
 
   ngOnInit(): void {
     this._indexeddbService.getAllItems<CategoryEntity>('categories', 'name', 'asc').then(response => {
-      if(response.length > 0) {
-        this._categories = response.filter(c=>c.type === this._categoryType);
+      if (response.total > 0) {
+        this._categories = response.items.filter(c => c.type === this._categoryType);
         this.loadTable();
       }
     }, error => {
@@ -78,10 +78,10 @@ export class IncomesComponent implements OnInit {
   }
 
   public loadTable(): void {
-    console.log('loadTable', this._options);
-    this._indexeddbService.getListPagination<TransactionEntity>('transactions', this._options.skip, this._options.take, 'created', 'desc').then(response => {
-      if(response.length > 0) {
-        this._incomes = response.filter(c=>c.category.type === this._categoryType).map((item: TransactionEntity) => {
+    this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
+      if (response.total > 0) {
+        this._options.total = response.total;
+        this._incomes = response.items.filter(c => c.category.type === this._categoryType).map((item: TransactionEntity) => {
           const objReturn: DTOTransaction = {
             transactionId: item.transactionId,
             name: item.name,
@@ -98,7 +98,7 @@ export class IncomesComponent implements OnInit {
       }
 
       const options: Highcharts.Options = this.getChartOptions();
-      if(this._incomes.length > 1 && this.chart !== null) {
+      if (this._incomes.length > 1 && this.chart !== null) {
         this._highchartService.updateChart(this.chart, options);
       } else {
         this.chart = this._highchartService.buildChart('container', options);
@@ -109,7 +109,7 @@ export class IncomesComponent implements OnInit {
   }
 
   public openModal(item: DTOTransaction | null = null): void {
-    if(item !== null) {
+    if (item !== null) {
       this._selectedIncome = item;
       this._form = this._fb.group({
         opc: ['Edit'],
@@ -149,15 +149,15 @@ export class IncomesComponent implements OnInit {
       return;
     }
     const findCategory = this._categories.find((item) => item.categoryId === model.categoryId && item.type === this._categoryType);
-    if(findCategory === undefined) {
+    if (findCategory === undefined) {
       alert('No se encontró la categoría');
       return;
     }
 
-    if(model.opc === 'Edit') {
+    if (model.opc === 'Edit') {
       const transactions = await this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'asc');
-      const findTransaction = transactions.find((item) => item.transactionId === model.transactionId);
-      if(findTransaction === undefined) {
+      const findTransaction = transactions.items.find((item) => item.transactionId === model.transactionId);
+      if (findTransaction === undefined) {
         alert('No se encontró la transacción');
         return;
       }
@@ -222,7 +222,7 @@ export class IncomesComponent implements OnInit {
       sliced: boolean;
     }[] = [];
     const total = this._incomes.reduce((a, b) => a + b.amount, 0);
-    
+
     for (let i = 0; i < this._categories.length; i++) {
       const item = this._categories[i];
       const amount = this._incomes.reduce((a, b) => a + (b.categoryId === item.categoryId ? b.amount : 0), 0);
@@ -239,8 +239,10 @@ export class IncomesComponent implements OnInit {
       });
     }
 
-    const findHightPorcent = data.reduce((a, b) => a.y > b.y ? a : b);
-    findHightPorcent.name = `<b style="color: var(--color-green); font-size: 0.9rem;">${findHightPorcent.name}</b>`;
+    if(data.length > 0) {
+      const findHightPorcent = data.reduce((a, b) => a.y > b.y ? a : b);
+      findHightPorcent.name = `<b style="color: var(--color-green); font-size: 0.9rem;">${findHightPorcent.name}</b>`;
+    }
 
     return {
       title: {
@@ -263,13 +265,13 @@ export class IncomesComponent implements OnInit {
     };
   }
 
-  public loadPartialTable(item: any): void {
+  public loadPartialTable(item: DTOPartialTableOptions): void {
     this._options = item;
     this.loadTable();
   }
 
-  public changePartialTable(item: number): void {
-    this._options.take = item;
+  public changePartialTable(item: DTOPartialTableOptions): void {
+    this._options = item;
     this.loadTable();
   }
 

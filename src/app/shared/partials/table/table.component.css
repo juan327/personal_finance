@@ -1,4 +1,4 @@
-.footer {
+.header, .footer {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -26,6 +26,13 @@
             transition: background-color 0.3s ease;
             font-size: 0.9rem;
             color: var(--color-black-text);
+
+            &:disabled {
+                cursor: not-allowed;
+                &:hover {
+                    background-color: var(--color-black);
+                }
+            }
 
             &:hover {
                 background-color: var(--color-black-border);

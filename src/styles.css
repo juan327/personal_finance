@@ -9,10 +9,12 @@
     --color-black-text: #A1A1A6;
     --color-black-border: #27272A;
 
-    --color-green: #00C853;
-    --color-green-light: #00E676;
+    --color-green: #4ADE80;
+    --color-green-light: #86EFAC;
     --color-red: #FF0000;
     --color-red-light: #FF3333;
+    --color-blue: #60A5FA;
+    --color-blue-light: #93C5FD;
 }
 
 * {
@@ -40,6 +42,7 @@ button.btn {
     &.success {
         background-color: var(--color-green);
         border: 1px solid var(--color-green-light);
+        color: var(--color-black-border);
 
         &:hover {
             background-color: var(--color-green-light);
@@ -52,6 +55,15 @@ button.btn {
 
         &:hover {
             background-color: var(--color-red-light);
+        }
+    }
+
+    &.primary {
+        background-color: var(--color-blue);
+        border: 1px solid var(--color-blue-light);
+
+        &:hover {
+            background-color: var(--color-blue-light);
         }
     }
 
@@ -93,4 +105,8 @@ input, textarea, select {
         outline: none;
         border: 1px solid #fff;
     }
+}
+
+select {
+    cursor: pointer;
 }
