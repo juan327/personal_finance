@@ -28,25 +28,23 @@ export class AppComponent implements OnInit {
       {tableName: 'transactions', primaryKey: 'transactionId', indexes: [{name: 'transactionId', unique: true}, {name: 'name', unique: false}, {name: 'created', unique: false}]},
     ];
 
-    const listTemp = ['Categoria 1', 'Categoria 2', 'Categoria 3', 'Categoria 4', 'Otros'];
     this._indexeddbService.initDB(tables);
     
     this._indexeddbService.getAllItems<CategoryEntity>('categories', 'created', 'asc').then(response => {
       if(response.total <= 0) {
-
-        listTemp.forEach(item => {
-          this._indexeddbService.addItem<CategoryEntity>('categories', {
-            categoryId: this._genericService.generateGuid(),
-            name: item,
-            type: 1,
-            created: new Date(),
-          });
-          this._indexeddbService.addItem<CategoryEntity>('categories', {
-            categoryId: this._genericService.generateGuid(),
-            name: item,
-            type: 2,
-            created: new Date(),
-          });
+        this._indexeddbService.addItem<CategoryEntity>('categories', {
+          categoryId: this._genericService.generateGuid(),
+          name: 'Otros',
+          type: 1,
+          created: new Date(),
+          isDefault: true,
+        });
+        this._indexeddbService.addItem<CategoryEntity>('categories', {
+          categoryId: this._genericService.generateGuid(),
+          name: 'Otros',
+          type: 2,
+          created: new Date(),
+          isDefault: true,
         });
       }
     }, error => {

@@ -1,17 +1,17 @@
 <section>
     <div class="card">
         <span class="title">Balance total</span>
-        <h3 class="balance">${{this._results.total}}</h3>
+        <h3 class="balance" [class]="this._results.totalInt >= 0 ? 'income' : 'expense'">${{this._results.total}}</h3>
         <span class="comment">+20.1% del mes pasado</span>
     </div>
     <div class="card">
         <span class="title">Ingresos del Mes</span>
-        <h3 class="balance">${{this._results.totalIncomes}}</h3>
+        <h3 class="balance income">${{this._results.totalIncomes}}</h3>
         <span class="comment">+8.2% del mes pasado</span>
     </div>
     <div class="card">
         <span class="title">Gastos del Mes</span>
-        <h3 class="balance">${{this._results.totalExpenses}}</h3>
+        <h3 class="balance expense">${{this._results.totalExpenses}}</h3>
         <span class="comment">-4.5% del mes pasado</span>
     </div>
     <div class="card">
@@ -38,7 +38,7 @@
                 </tr>
             </ng-template>
             <ng-template #body let-item>
-                <tr>
+                <tr [class]="item.categoryType === 1 ? 'income' : 'expense'">
                     <td>{{item.categoryName}}</td>
                     <td>{{item.name}}</td>
                     <td>${{item.categoryType === 1 ? '' : '-'}}{{this._genericService.convertToCurrencyFormat(item.amount).data}}</td>

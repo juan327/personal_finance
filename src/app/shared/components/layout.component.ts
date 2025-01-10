@@ -14,9 +14,10 @@ export class LayoutComponent implements OnInit {
 
     private readonly _router = inject(Router);
     public readonly _menu = [
-      { path: '/home', label: 'Resumen' },
-      { path: '/incomes', label: 'Ingresos' },
-      { path: '/expenses', label: 'Gastos' },
+      { path: '/home', label: 'Resumen', icon: 'pi pi-home' },
+      { path: '/incomes', label: 'Ingresos', icon: 'pi pi-money-bill' },
+      { path: '/expenses', label: 'Gastos', icon: 'pi pi-receipt' },
+      { path: '/configuration', label: 'Configuración', icon: 'pi pi-cog' },
     ];
 
     public _selectedMenu = this._menu[0];

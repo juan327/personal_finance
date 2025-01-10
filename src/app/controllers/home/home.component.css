@@ -32,6 +32,27 @@ section {
                 color: var(--color-black-text);
             }
         }
+
+        .balance {
+            &.income { color: var(--color-green); }
+            &.expense { color: var(--color-red); }
+        }
     }
 
+}
+
+tr {
+    &.income {
+        background-color: rgba(134, 239, 172, 0.2) !important;
+        &:nth-child(odd) {
+            background-color: rgba(71, 212, 122, 0.2) !important;
+        }
+    }
+
+    &.expense {
+        background-color: rgba(255, 102, 102, 0.2) !important;
+        &:nth-child(odd) {
+            background-color: rgba(255, 0, 0, 0.2) !important;
+        }
+    }
 }

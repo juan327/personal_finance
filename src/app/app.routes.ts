@@ -20,6 +20,10 @@ export const routes: Routes = [
                 path: 'expenses',
                 loadComponent: () => import('./controllers/expenses/expenses.component').then(m => m.ExpensesComponent),
             },
+            {
+                path: 'configuration',
+                loadComponent: () => import('./controllers/configuration/configuration.component').then(m => m.ConfigurationComponent),
+            }
         ]
     },
     {

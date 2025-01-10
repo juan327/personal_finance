@@ -23,7 +23,14 @@ nav {
                 padding: 5px 20px;
                 color: var(--color-black-text);
                 text-decoration: none;
-                display: block;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+
+                i {
+                    font-size: 1.1rem;
+                }
             }
 
             &:hover {

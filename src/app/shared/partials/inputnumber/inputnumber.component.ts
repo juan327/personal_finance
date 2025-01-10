@@ -41,7 +41,7 @@ export class InputNumberComponent implements OnInit {
   }
 
   private writeValue(value: string): void {
-    this.value = this.resetNumber(value);
+    this.value = this.resetNumber(value, '.00');
   }
 
   private registerOnChange(fn: any): void {
@@ -54,7 +54,7 @@ export class InputNumberComponent implements OnInit {
 
   public updateValue(event: Event): void {
     const input = event.target as HTMLInputElement;
-    input.value = this.resetNumber(input.value);
+    input.value = this.resetNumber(input.value, '');
 
     if(!this.validateNumbers(input.value)) {
       input.value = this.value;
@@ -72,7 +72,7 @@ export class InputNumberComponent implements OnInit {
    * @param value - El valor a formatear.
    * @returns - El valor formateado.
    */
-  private resetNumber(value: string): string {
+  private resetNumber(value: string, extension: string): string {
     if(value === null || value === undefined || value === '') {
       return '0.00';
     }
@@ -80,7 +80,7 @@ export class InputNumberComponent implements OnInit {
     if(decimal.length > 3) {
       return value.slice(0, value.indexOf('.') + 3);
     }
-    return value;
+    return value + extension;
   }
 
 
@@ -97,7 +97,7 @@ export class InputNumberComponent implements OnInit {
 
   public onBlur(event: Event): void {
     const input = event.target as HTMLInputElement;
-    input.value = this.resetNumber(input.value);
+    input.value = this.resetNumber(input.value, '');
 
     if(!input.value.includes('.')) {
       input.value = input.value !== '' ? input.value + '.00' : input.value;

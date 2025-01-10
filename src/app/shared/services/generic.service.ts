@@ -158,32 +158,6 @@ export class GenericService {
         return this._decimalPipe.transform(value, '1.2-2') || '0.00';
     }
 
-    public getDataTest(): { categories: CategoryEntity[], incomes: TransactionEntity[] } {
-        const categories: CategoryEntity[] = [
-            { categoryId: this.generateGuid(), name: 'Sueldo', type: 1, created: new Date() },
-            { categoryId: this.generateGuid(), name: 'Extra', type: 1, created: new Date() },
-            { categoryId: this.generateGuid(), name: 'Servicios', type: 1, created: new Date() },
-            { categoryId: this.generateGuid(), name: 'Otros', type: 1, created: new Date() },
-            { categoryId: this.generateGuid(), name: 'Dulces', type: 2, created: new Date() },
-            { categoryId: this.generateGuid(), name: 'Ropa', type: 2, created: new Date() },
-            { categoryId: this.generateGuid(), name: 'Servicios', type: 2, created: new Date() },
-            { categoryId: this.generateGuid(), name: 'Otros', type: 2, created: new Date() },
-        ];
-        const incomes: TransactionEntity[] = [
-            { transactionId: this.generateGuid(), name: 'Ingreso 1', amount: 10000, date: new Date(), description: 'Descripción 1', categoryId: categories[0].categoryId, category: categories[0], created: new Date() },
-            { transactionId: this.generateGuid(), name: 'Ingreso 2', amount: 20000, date: new Date(), description: 'Descripción 2', categoryId: categories[1].categoryId, category: categories[1], created: new Date() },
-            { transactionId: this.generateGuid(), name: 'Ingreso 3', amount: 30000, date: new Date(), description: 'Descripción 3', categoryId: categories[2].categoryId, category: categories[2], created: new Date() },
-            { transactionId: this.generateGuid(), name: 'Ingreso 4', amount: 40000, date: new Date(), description: 'Descripción 4', categoryId: categories[3].categoryId, category: categories[3], created: new Date() },
-            
-            { transactionId: this.generateGuid(), name: 'Ingreso 5', amount: 50000, date: new Date(), description: 'Descripción 5', categoryId: categories[4].categoryId, category: categories[4], created: new Date() },
-            { transactionId: this.generateGuid(), name: 'Ingreso 6', amount: 60000, date: new Date(), description: 'Descripción 6', categoryId: categories[5].categoryId, category: categories[5], created: new Date() },
-            { transactionId: this.generateGuid(), name: 'Ingreso 7', amount: 70000, date: new Date(), description: 'Descripción 7', categoryId: categories[6].categoryId, category: categories[6], created: new Date() },
-            { transactionId: this.generateGuid(), name: 'Ingreso 8', amount: 80000, date: new Date(), description: 'Descripción 8', categoryId: categories[7].categoryId, category: categories[7], created: new Date() },
-        ];
-        return { categories, incomes };
-    }
-
-
     /**
      * Devuelve una lista de los 12 meses del año con su nombre, fecha de inicio y fin
      * @param year El año para el cual se desea generar la lista

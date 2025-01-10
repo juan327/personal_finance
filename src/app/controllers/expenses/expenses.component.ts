@@ -58,7 +58,7 @@ export class ExpensesComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this._indexeddbService.getAllItems<CategoryEntity>('categories', 'name', 'asc').then(response => {
+    this._indexeddbService.getAllItems<CategoryEntity>('categories', 'name', 'desc').then(response => {
       if (response.total > 0) {
         this._categories = response.items.filter(c => c.type === this._categoryType);
         this.loadTable();
@@ -80,8 +80,11 @@ export class ExpensesComponent implements OnInit {
   public loadTable(): void {
     this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
       if (response.total > 0) {
-        this._options.total = response.total;
-        this._incomes = response.items.filter(c => c.category.type === this._categoryType).map((item: TransactionEntity) => {
+        const search = this._options.search.trim().toLowerCase();
+        this._incomes = response.items.filter(c => c.category.type === this._categoryType
+          && (c.name.toLowerCase().includes(search)
+            || c.description.toLowerCase().includes(search)
+            || c.category.name.toLowerCase().includes(search))).map((item: TransactionEntity) => {
           const objReturn: DTOTransaction = {
             transactionId: item.transactionId,
             name: item.name,
@@ -95,6 +98,7 @@ export class ExpensesComponent implements OnInit {
           };
           return objReturn;
         });
+        this._options.total = this._incomes.length;
       }
 
       const options: Highcharts.Options = this.getChartOptions();
@@ -155,23 +159,21 @@ export class ExpensesComponent implements OnInit {
     }
 
     if (model.opc === 'Edit') {
-      const transactions = await this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'asc');
-      const findTransaction = transactions.items.find((item) => item.transactionId === model.transactionId);
-      if (findTransaction === undefined) {
-        alert('No se encontró la transacción');
-        return;
-      }
-      findTransaction.name = model.name;
-      findTransaction.amount = responseAmount.data;
-      findTransaction.date = new Date(model.date);
-      findTransaction.description = model.description;
-      findTransaction.categoryId = model.categoryId;
-      findTransaction.category = findCategory;
-
-      this._indexeddbService.updateItem<TransactionEntity>('transactions', findTransaction.transactionId, findTransaction).then(response => {
-        this._modals.income = false;
-        this.loadTable();
-      }, error => {
+      this._indexeddbService.getItem<TransactionEntity>('transactions', model.transactionId).then(response => {
+        response.name = model.name;
+        response.amount = responseAmount.data;
+        response.date = new Date(model.date);
+        response.description = model.description;
+        response.categoryId = model.categoryId;
+        response.category = findCategory;
+  
+        this._indexeddbService.updateItem<TransactionEntity>('transactions', response.transactionId, response).then(response => {
+          this._modals.income = false;
+          this.loadTable();
+        }, error => {
+          console.error(error);
+        });
+      }, error => { 
         console.error(error);
       });
     } else {
@@ -272,6 +274,11 @@ export class ExpensesComponent implements OnInit {
 
   public changePartialTable(item: DTOPartialTableOptions): void {
     this._options = item;
+    this.loadTable();
+  }
+
+  public search(event: any): void {
+    this._options.search = event.target.value;
     this.loadTable();
   }
 

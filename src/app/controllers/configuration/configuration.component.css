@@ -17,7 +17,7 @@ section {
         display: flex;
         flex-direction: column;
         padding: 20px;
-        gap: 5px;
+        gap: 20px;
         border-radius: 10px;
         background-color: var(--color-black);
         border: 1px solid var(--color-black-border);
@@ -55,26 +55,24 @@ section {
 
 }
 
-form {
-    .form {
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .form-group {
         display: flex;
         flex-direction: column;
         gap: 10px;
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-    
-            label {
-                font-size: 1.1rem;
-            }
-            
+        label {
+            font-size: 1.1rem;
         }
+        
     }
+}
 
-    .footer {
-        display: flex;
-        justify-content: flex-end;
-    }
+.footer {
+    display: flex;
+    justify-content: flex-end;
 }

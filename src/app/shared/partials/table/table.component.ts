@@ -62,6 +62,9 @@ export class TableComponent implements OnInit, OnChanges {
 
       this._listPages = [];
       this._totalPages = this.getTotalPages();
+      if(this._actualPage > this._totalPages && this._totalPages > 0) {
+        this.changePage(this._totalPages);
+      }
       for (let i = 0; i < this._totalPages; i++) {
         this._listPages.push(i + 1);
       }
@@ -69,24 +72,16 @@ export class TableComponent implements OnInit, OnChanges {
   }
 
   private loadTable(): void {
-    let values = this._values;
-
-    if(this._options.search !== '') {
-      const search = this._options.search.trim().toLowerCase();
-      values = this._values.filter(item => item.name.toLowerCase().includes(search));
-    }
-
-
     if (this._options.take < 0) {
-      this._valuesView = values;
+      this._valuesView = this._values;
       return;
     }
     
     this._valuesView = [];
 
     var count: number = 0;
-    for (let i = 0; i < values.length; i++) {
-      const item = values[i];
+    for (let i = 0; i < this._values.length; i++) {
+      const item = this._values[i];
 
       if (count >= this._options.skip && this._valuesView.length < this._options.take) {
         this._valuesView.push(item); // Agrega el valor a los resultados

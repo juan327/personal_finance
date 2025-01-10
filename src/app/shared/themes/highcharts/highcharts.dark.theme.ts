@@ -11,17 +11,17 @@ export const darkTheme: Highcharts.Options = {
     }
   },
   xAxis: {
-    gridLineColor: '#333', // Color de líneas de la cuadrícula
+    gridLineColor: 'var(--color-black-border)', // Color de líneas de la cuadrícula
     labels: {
       style: {
         color: '#FFF'
       }
     },
-    lineColor: '#333',
-    tickColor: '#333'
+    lineColor: 'var(--color-black-border)',
+    tickColor: 'var(--color-black-border)'
   },
   yAxis: {
-    gridLineColor: '#333',
+    gridLineColor: 'var(--color-black-border)',
     labels: {
       style: {
         color: '#FFF'
@@ -42,7 +42,7 @@ export const darkTheme: Highcharts.Options = {
     }
   },
   tooltip: {
-    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Fondo semi-transparente
+    backgroundColor: 'var(--color-black)', // Fondo semi-transparente
     style: {
       color: '#FFF' // Texto blanco
     }

@@ -1,6 +1,6 @@
 export interface DTOResponseApi {
     message: string;
-    exception: string;
+    exception?: string;
     confirmation: boolean;
 }
 

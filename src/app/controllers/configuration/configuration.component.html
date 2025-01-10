@@ -1,0 +1,97 @@
+<section>
+    <div class="card">
+        <h2>Configuración</h2>
+
+        <div class="form">
+            <div class="form-group">
+                <label for="currency">Divisa</label>
+                <select [(ngModel)]="this._selectedCurrency" id="currency" name="currency" required>
+                    @for (item of this._currencies; track $index) {
+                    <option [value]="item.value">{{item.label}}</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        
+        <partial-table [_values]="this._categories" [_options]="this._options" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">
+            <ng-template #caption>
+                <div class="caption">
+                    <h2>Categorias</h2>
+                    <button type="button" class="btn success" (click)="this.openModal()">Agregar categoria</button>
+                    <input type="text" placeholder="Busqueda rapida..." (input)="this.search($event)">
+                </div>
+            </ng-template>
+            <ng-template #header>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Nombre</th>
+                    <th>Creación</th>
+                    <th>OPC</th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-item>
+                <tr>
+                    <td>{{item.type === 1 ? 'Ingreso' : 'Gasto'}}</td>
+                    <td>{{item.name}}</td>
+                    <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                    <td>
+                        @if(!item.isDefault) {
+                            <div class="operations">
+                                <button type="button" class="btn primary" title="Editar" (click)="this.openModal(item)">
+                                    <i class="pi pi-pen-to-square"></i>
+                                </button>  
+                                <button type="button" class="btn danger" title="Eliminar" (click)="this.modalOpenDelete(item)">
+                                    <i class="pi pi-trash"></i>
+                                </button>
+                            </div>
+                        }
+                    </td>
+                </tr>
+            </ng-template>
+        </partial-table>
+
+    </div>
+</section>
+
+@if(this._modals.category && this._form !== null) {
+<form [formGroup]="this._form" (ngSubmit)="this.submitForm(this._form)">
+    <partial-modal (eventCloseModal)="this.closeModal()">
+        <ng-template #header>
+            <h2>{{this._form.get('opcLabel')?.value}} categoria</h2>
+        </ng-template>
+        <ng-template #body>
+            <div class="form">
+                <div class="form-group">
+                    <label for="name">Nombre</label>
+                    <input type="text" formControlName="name" id="name" name="name" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="type">Tipo</label>
+                    <select formControlName="type" id="type" name="type" required>
+                        @for (item of this._types; track $index) {
+                        <option [value]="item.value">{{item.label}}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template #footer>
+            <div class="footer">
+                <button type="submit" class="btn success" [disabled]="this._form.invalid">{{this._form.get('opcLabel')?.value}}</button>
+            </div>
+        </ng-template>
+    </partial-modal>
+</form>
+}
+
+@if(this._modals.deleteCategory && this._selectedCategory !== null) {
+    <partial-modalconfirmation (eventOnSuccess)="this.onDelete(this._selectedCategory)" (eventOnCancel)="this._modals.deleteCategory = false; this._selectedCategory = null;">
+        <ng-template #header>
+            <h2>Eliminar ingreso</h2>
+        </ng-template>
+        <ng-template #body>
+            <h4>¿Está seguro de que desea eliminar el ingreso <b>{{this._selectedCategory.name}}</b>?</h4>
+        </ng-template>
+    </partial-modalconfirmation>
+}

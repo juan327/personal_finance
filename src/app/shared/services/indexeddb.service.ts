@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DTOResponseListPagination } from '../dto/generic';
+import { DTOResponseApiWithData, DTOResponseListPagination } from '../dto/generic';
 
 @Injectable({
   providedIn: 'root',
@@ -80,6 +80,28 @@ export class IndexeddbService {
             };
             resolve(objReturn);
           }
+        };
+    
+        request.onerror = (event: any) => reject(event.target.error);
+      };
+
+      requestDB.onerror = () => reject(requestDB.error);
+    });
+  }
+
+  public getItem<T>(tableName: string, id: string): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const requestDB = indexedDB.open(this.dbName);
+
+      requestDB.onsuccess = (event: any) => {
+        const db = event.target.result;
+        const objectStore = db.transaction(tableName, 'readonly').objectStore(tableName);
+    
+        const request = objectStore.get(id);
+    
+        request.onsuccess = (event: any) => {
+          const data = event.target.result;
+          resolve(data);
         };
     
         request.onerror = (event: any) => reject(event.target.error);

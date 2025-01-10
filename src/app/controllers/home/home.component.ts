@@ -41,12 +41,14 @@ export class HomeComponent implements OnInit {
     totalIncomes: string,
     totalExpenses: string,
     total: string,
+    totalInt: number,
   } = {
       incomes: [],
       expenses: [],
       totalIncomes: '0',
       totalExpenses: '0',
       total: '0',
+      totalInt: 0,
     };
   public _options: DTOPartialTableOptions = {
     search: '',
@@ -94,6 +96,7 @@ export class HomeComponent implements OnInit {
       } else {
         this.chart = this._highchartService.buildChart('container', options);
       }
+      this.updateResults();
     }, error => {
       console.error(error);
     });
@@ -127,6 +130,7 @@ export class HomeComponent implements OnInit {
     this._results.totalIncomes = responsetotalIncomes.data;
     this._results.totalExpenses = responseTotalExpenses.data;
     this._results.total = responseTotal.data;
+    this._results.totalInt = totalIncomes - totalExpenses;
   }
 
   private getChartOptions(): Highcharts.Options {
@@ -170,14 +174,15 @@ export class HomeComponent implements OnInit {
       {
         name: 'Ingresos',
         data: dataIncomes,
-        color: '#00C853',
+        color: 'var(--color-green)',
       },
       {
         name: 'Gastos',
         data: dataExpenses,
-        color: '#FF0000',
+        color: 'var(--color-red)',
       }
     ];
+    console.log(series);
 
     return {
       chart: {

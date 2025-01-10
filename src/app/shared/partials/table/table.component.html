@@ -2,9 +2,9 @@
     <div class="caption">
         <ng-container *ngTemplateOutlet="this.templateCaption"></ng-container>
     </div>
-    <div class="filter">
+    <!-- <div class="filter">
         <input type="text" placeholder="Busqueda rapida..." (input)="this.search($event)">
-    </div>
+    </div> -->
     <div class="header">
         <ng-container *ngTemplateOutlet="Template_Pagination"></ng-container>
     </div>
@@ -26,6 +26,7 @@
 </div>
 
 <ng-template #Template_Pagination>
+    <span class="resume">Mostrando {{this._options.skip + 1}} al {{this._options.skip + this._valuesView.length}} de {{this._options.total}} registros</span>
     <div class="pagination">
         <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(1)">
             <i class="pi pi-angle-double-left"></i>

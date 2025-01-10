@@ -2,10 +2,7 @@ partial-table {
     .container {
         width: 100%;
         display: grid;
-
-        .caption {
-            padding: 10px;
-        }
+        gap: 10px;
 
         .body {
             overflow: auto;
