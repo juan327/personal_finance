@@ -4,7 +4,7 @@
             <ng-template #caption>
                 <div class="caption">
                     <h2>Historial</h2>
-                    <button type="button" class="btn success" (click)="this.openModal()">Agregar gasto</button>
+                    <button type="button" class="btn success" (click)="this.onOpenModal()">Agregar gasto</button>
                     <input type="text" placeholder="Busqueda rapida..." (input)="this.search($event)">
                 </div>
             </ng-template>
@@ -23,13 +23,15 @@
                 <tr>
                     <td>{{item.categoryName}}</td>
                     <td>{{item.name}}</td>
-                    <td>${{this._genericService.convertToCurrencyFormat(item.amount).data}}</td>
+                    <td>
+                        {{this._localStorage.currency}} {{item.amountString}}
+                    </td>
                     <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
                     <td>{{item.description}}</td>
                     <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
                     <td>
                         <div class="operations">
-                            <button type="button" class="btn primary" title="Editar" (click)="this.openModal(item)">
+                            <button type="button" class="btn primary" title="Editar" (click)="this.onOpenModal(item)">
                                 <i class="pi pi-pen-to-square"></i>
                             </button>  
                             <button type="button" class="btn danger" title="Eliminar" (click)="this.modalOpenDelete(item)">
@@ -39,11 +41,8 @@
                     </td>
                 </tr>
             </ng-template>
-            <ng-template #footer>
-                <button type="button" class="btn success" (click)="this.openModal()">Agregar gasto</button>
-            </ng-template>
         </partial-table>
-        TOTAL: ${{this._genericService.convertToCurrencyFormat(this.getTotal()).data}}
+        TOTAL: {{this._localStorage.currency}} {{this._genericService.convertToCurrencyFormat(this.getTotal()).data}}
     </div>
 
     <div class="card">

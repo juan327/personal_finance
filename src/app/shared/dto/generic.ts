@@ -19,3 +19,8 @@ export interface DTOResponseListPagination<T> {
     items: T[];
     total: number;
 }
+
+export interface DTOLocalStorage {
+    currency: string;
+    language: string;
+}

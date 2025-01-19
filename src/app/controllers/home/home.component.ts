@@ -1,6 +1,5 @@
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { DTOTransaction } from 'src/app/shared/dto/transaction';
 import { CategoryEntity } from 'src/app/shared/entities/category';
 import { TransactionEntity } from 'src/app/shared/entities/transaction';
@@ -19,7 +18,7 @@ Highcharts.setOptions(darkTheme); // Aplica el tema
 
 @Component({
   selector: 'app-home',
-  imports: [RouterOutlet, CommonModule, HighchartsChartModule, TableComponent],
+  imports: [CommonModule, HighchartsChartModule, TableComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   standalone: true,
@@ -59,6 +58,12 @@ export class HomeComponent implements OnInit {
 
   public chart: Chart | null = null;
 
+  public _localStorage: {
+    currency: string;
+  } = {
+    currency: this._genericService.getLocalStorage<string>('currency') || '$',
+  };
+
   ngOnInit(): void {
     this.loadTable();
   }
@@ -79,6 +84,7 @@ export class HomeComponent implements OnInit {
             transactionId: item.transactionId,
             name: item.name,
             amount: item.amount,
+            amountString: `${this._localStorage.currency} ${this._genericService.convertToCurrencyFormat(item.amount).data}`,
             date: item.date,
             description: item.description,
             categoryId: item.categoryId,
@@ -211,7 +217,7 @@ export class HomeComponent implements OnInit {
         }
       },
       tooltip: {
-        valuePrefix: '$'
+        valuePrefix: this._localStorage.currency + ' '
       },
       series: series as any
     };

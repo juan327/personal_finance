@@ -1,10 +1,10 @@
 <section>
     <div class="card">
-        <partial-table [_values]="this._incomes" [_options]="this._options" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">
+        <partial-table [_values]="this._transactions" [_options]="this._partialTableOptions" (eventOnLoad)="this.onLoadPartialTable($event)" (eventOnChange)="this.onChangePartialTable($event)">
             <ng-template #caption>
                 <div class="caption">
                     <h2>Historial</h2>
-                    <button type="button" class="btn success" (click)="this.openModal()">Agregar ingreso</button>
+                    <button type="button" class="btn success" (click)="this.onOpenModal()">Agregar ingreso</button>
                     <input type="text" placeholder="Busqueda rapida..." (input)="this.search($event)">
                 </div>
             </ng-template>
@@ -23,27 +23,26 @@
                 <tr>
                     <td>{{item.categoryName}}</td>
                     <td>{{item.name}}</td>
-                    <td>${{this._genericService.convertToCurrencyFormat(item.amount).data}}</td>
+                    <td>
+                        {{this._localStorage.currency}} {{item.amountString}}
+                    </td>
                     <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
                     <td>{{item.description}}</td>
                     <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
                     <td>
                         <div class="operations">
-                            <button type="button" class="btn primary" title="Editar" (click)="this.openModal(item)">
+                            <button type="button" class="btn primary" title="Editar" (click)="this.onOpenModal(item)">
                                 <i class="pi pi-pen-to-square"></i>
                             </button>  
-                            <button type="button" class="btn danger" title="Eliminar" (click)="this.modalOpenDelete(item)">
+                            <button type="button" class="btn danger" title="Eliminar" (click)="this.onModalOpenDelete(item)">
                                 <i class="pi pi-trash"></i>
                             </button>
                         </div>
                     </td>
                 </tr>
             </ng-template>
-            <ng-template #footer>
-                <button type="button" class="btn success" (click)="this.openModal()">Agregar ingreso</button>
-            </ng-template>
         </partial-table>
-        TOTAL: ${{this._genericService.convertToCurrencyFormat(this.getTotal()).data}}
+        TOTAL: {{this._totalAmountSignal()}}
     </div>
 
     <div class="card">
@@ -51,9 +50,9 @@
     </div>
 </section>
 
-@if(this._modals.income && this._form !== null) {
-<form [formGroup]="this._form" (ngSubmit)="this.submitForm(this._form)">
-    <partial-modal (eventCloseModal)="this.closeModal()">
+@if(this._modals.transaction && this._form !== null) {
+<form [formGroup]="this._form" (ngSubmit)="this.onSubmitForm(this._form)">
+    <partial-modal (eventCloseModal)="this.onCloseModal()">
         <ng-template #header>
             <h2>{{this._form.get('opcLabel')?.value}} ingreso</h2>
         </ng-template>
@@ -96,13 +95,13 @@
 </form>
 }
 
-@if(this._modals.deleteIncome && this._selectedIncome !== null) {
-    <partial-modalconfirmation (eventOnSuccess)="this.onDelete(this._selectedIncome)" (eventOnCancel)="this._modals.deleteIncome = false; this._selectedIncome = null;">
+@if(this._modals.deleteTransaction && this._selectedTransaction !== null) {
+    <partial-modalconfirmation (eventOnSuccess)="this.onDelete(this._selectedTransaction)" (eventOnCancel)="this._modals.deleteTransaction = false; this._selectedTransaction = null;">
         <ng-template #header>
             <h2>Eliminar ingreso</h2>
         </ng-template>
         <ng-template #body>
-            <h4>¿Está seguro de que desea eliminar el ingreso <b>{{this._selectedIncome.name}}</b>?</h4>
+            <h4>¿Está seguro de que desea eliminar el ingreso <b>{{this._selectedTransaction.name}}</b>?</h4>
         </ng-template>
     </partial-modalconfirmation>
 }

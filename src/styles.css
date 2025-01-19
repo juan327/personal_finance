@@ -110,3 +110,10 @@ input, textarea, select {
 select {
     cursor: pointer;
 }
+
+hr {
+    margin: 0;
+    border: none;
+    background-color: var(--color-black-border);
+    height: 1.5px;
+}

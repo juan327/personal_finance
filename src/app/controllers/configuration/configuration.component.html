@@ -4,14 +4,23 @@
 
         <div class="form">
             <div class="form-group">
+                <label for="language">Idioma</label>
+                <select [(ngModel)]="this._selectedLanguage" id="language" name="language" required>
+                    @for (item of this._languages; track $index) {
+                    <option [value]="item.value">{{item.label}}</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="currency">Divisa</label>
-                <select [(ngModel)]="this._selectedCurrency" id="currency" name="currency" required>
+                <select [(ngModel)]="this._selectedCurrency" (change)="this.onChangeCurrency($event)" id="currency" name="currency" required>
                     @for (item of this._currencies; track $index) {
                     <option [value]="item.value">{{item.label}}</option>
                     }
                 </select>
             </div>
         </div>
+        <hr>
 
         
         <partial-table [_values]="this._categories" [_options]="this._options" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">

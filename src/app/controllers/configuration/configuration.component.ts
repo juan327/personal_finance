@@ -1,11 +1,8 @@
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
 import { ModalComponent } from 'src/app/shared/partials/modal/modal.component';
 import { FormsModule } from '@angular/forms';
-import { InputNumberComponent } from 'src/app/shared/partials/inputnumber/inputnumber.component';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
-import { DecimalValidator } from 'src/app/shared/validators/decimal.validator';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { TransactionEntity } from 'src/app/shared/entities/transaction';
 import { CategoryEntity } from 'src/app/shared/entities/category';
@@ -17,7 +14,7 @@ import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTab
 
 @Component({
   selector: 'app-configuration',
-  imports: [RouterOutlet, CommonModule, FormsModule, ReactiveFormsModule, ModalComponent, InputNumberComponent, TableComponent, ModalConfirmationComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ModalComponent, TableComponent, ModalConfirmationComponent],
   templateUrl: './configuration.component.html',
   styleUrl: './configuration.component.css',
   standalone: true,
@@ -40,6 +37,13 @@ export class ConfigurationComponent implements OnInit {
   }[] = [
       { value: '$', label: '$ USD' }, { value: '€', label: '€ EUR' }, { value: 'S/.', label: 'S/. PEN' }
     ];
+  public _selectedLanguage: string = 'es';
+  public _languages: {
+    value: string;
+    label: string;
+  }[] = [
+      { value: 'en', label: 'English' }, { value: 'es', label: 'Español' }
+    ];
   public _options: DTOPartialTableOptions = {
     search: '',
     skip: 0,
@@ -58,9 +62,10 @@ export class ConfigurationComponent implements OnInit {
   }[] = [
       { value: 1, label: 'Ingreso' },
       { value: 2, label: 'Gasto' },
-    ]
+    ];
 
   ngOnInit(): void {
+    this._selectedCurrency = this._genericService.getLocalStorage<string>('currency') || '$';
     this.loadTable();
   }
 
@@ -187,6 +192,10 @@ export class ConfigurationComponent implements OnInit {
   public search(event: any): void {
     this._options.search = event.target.value;
     this.loadTable();
+  }
+
+  public onChangeCurrency(event: any): void {
+    this._genericService.setLocalStorage('currency', event.target.value);
   }
 
 }

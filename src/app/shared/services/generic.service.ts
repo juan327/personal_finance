@@ -13,6 +13,35 @@ export class GenericService {
 
     private readonly _datePipe = inject(DatePipe);
     private readonly _decimalPipe = inject(DecimalPipe);
+    
+    public setLocalStorage(key: string, value: any): void {
+        localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    public getLocalStorage<T>(key: string): T | null {
+        const value = localStorage.getItem(key);
+        if (value === null || value === 'null' || value === 'undefined' || value === '' || value === undefined) {
+            return null;
+        }
+        return JSON.parse(value);
+    }
+
+    public removeLocalStorage(key: string): void {
+        localStorage.removeItem(key);
+    }
+
+    public setLanguage(language: string): void {
+        this.setLocalStorage('language', language);
+        //this._languageSubject.next(language);
+    }
+
+    public getLanguage(): string {
+        const language = this.getLocalStorage<string>('language');
+        if(language === null) {
+            return 'en';
+        }
+        return language;
+    }
 
     public getDateTimeNow(): Date {
         try {
