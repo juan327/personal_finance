@@ -11,7 +11,7 @@ import { HighchartService } from 'src/app/shared/services/highchart.service';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { CategoryEntity } from 'src/app/shared/entities/category';
 import { DTOLoadTable, DTOModalOpen } from './dto/expenses.dto';
-import { DTOResponseApi, DTOResponseApiWithData } from 'src/app/shared/dto/generic';
+import { DTOLocalStorage, DTOResponseApi, DTOResponseApiWithData } from 'src/app/shared/dto/generic';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DecimalValidator } from 'src/app/shared/validators/decimal.validator';
 //#endregion
@@ -63,8 +63,7 @@ export class ExpensesService {
      */
     public async loadCategories(): Promise<DTOResponseApiWithData<CategoryEntity[]>> {
         var objReturn: DTOResponseApiWithData<CategoryEntity[]> = this.getDefaultObjReturnWithData();
-        try
-        {
+        try {
             await this._indexeddbService.getAllItems<CategoryEntity>('categories', 'name', 'desc').then(response => {
                 objReturn.data = response.items.filter(c => c.type === this._categoryType);
                 objReturn.confirmation = true;
@@ -75,8 +74,7 @@ export class ExpensesService {
                 objReturn.exception = error.toString();
             });
         }
-        catch (error: any)
-        {
+        catch (error: any) {
             console.error(error);
             objReturn.message = error.message;
             objReturn.exception = error.toString();
@@ -84,15 +82,14 @@ export class ExpensesService {
         return objReturn;
     }
 
-    public async loadTable(_options: DTOPartialTableOptions, _transactions: DTOTransaction[], _categories: CategoryEntity[],
-        _localStorage: any, _chart: Chart | null): Promise<DTOResponseApiWithData<DTOLoadTable>> {
+    public async loadTable(_partialTableOptions: DTOPartialTableOptions, _transactions: DTOTransaction[], _categories: CategoryEntity[],
+        _localStorage: DTOLocalStorage, _chart: Chart | null): Promise<DTOResponseApiWithData<DTOLoadTable>> {
 
         var objReturn: DTOResponseApiWithData<DTOLoadTable> = this.getDefaultObjReturnWithData();
-        try
-        {
+        try {
             await this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
                 if (response.total > 0) {
-                    const search = _options.search.trim().toLowerCase();
+                    const search = _partialTableOptions.search.trim().toLowerCase();
                     _transactions = response.items.filter(c => c.category.type === this._categoryType
                         && (c.name.toLowerCase().includes(search)
                             || c.description.toLowerCase().includes(search)
@@ -101,7 +98,7 @@ export class ExpensesService {
                                     transactionId: item.transactionId,
                                     name: item.name,
                                     amount: item.amount,
-                                    amountString: `${this._genericService.convertToCurrencyFormat(item.amount).data}`,
+                                    amountString: this._genericService.convertToCurrencyFormat(item.amount).data,
                                     date: item.date,
                                     description: item.description,
                                     categoryId: item.categoryId,
@@ -111,11 +108,11 @@ export class ExpensesService {
                                 };
                                 return objReturn;
                             });
-                    _options.total = _transactions.length;
+                    _partialTableOptions.total = _transactions.length;
                 }
-    
+
                 const responseChartOptions = this.getChartOptions(_transactions, _categories, _localStorage);
-                if(!responseChartOptions.confirmation) {
+                if (!responseChartOptions.confirmation) {
                     objReturn.message = responseChartOptions.message;
                     objReturn.exception = responseChartOptions.exception;
                 } else {
@@ -126,7 +123,7 @@ export class ExpensesService {
                     }
                 }
                 objReturn.data = {
-                    options: _options,
+                    partialTableOptions: _partialTableOptions,
                     transactions: _transactions,
                     categories: _categories,
                     chart: _chart,
@@ -139,8 +136,7 @@ export class ExpensesService {
                 objReturn.exception = error.toString();
             });
         }
-        catch (error: any)
-        {
+        catch (error: any) {
             console.error(error);
             objReturn.message = error.message;
             objReturn.exception = error.toString();
@@ -150,8 +146,7 @@ export class ExpensesService {
 
     public modalOpen(_form: FormGroup | null, _selectedIncome: DTOTransaction | null, _categories: CategoryEntity[], item: DTOTransaction | null = null): DTOResponseApiWithData<DTOModalOpen> {
         var objReturn: DTOResponseApiWithData<DTOModalOpen> = this.getDefaultObjReturnWithData();
-        try
-        {
+        try {
             if (item !== null) {
                 _selectedIncome = item;
                 _form = this._fb.group({
@@ -159,7 +154,7 @@ export class ExpensesService {
                     opcLabel: ['Editar'],
                     transactionId: [item.transactionId, [Validators.required]],
                     name: [item.name, [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
-                    amount: [this._genericService.convertToNumberDecimal(item.amount).data.toString(), [Validators.required, DecimalValidator(2)]],
+                    amount: [item.amountString, [Validators.required, DecimalValidator(2)]],
                     date: [this._genericService.transformDateToString(item.date), [Validators.required]],
                     categoryId: [item.categoryId, [Validators.required]],
                     description: [item.description],
@@ -184,8 +179,7 @@ export class ExpensesService {
             objReturn.confirmation = true;
             objReturn.message = 'Modal abierto correctamente';
         }
-        catch (error: any)
-        {
+        catch (error: any) {
             console.error(error);
             objReturn.message = error.message;
             objReturn.exception = error.toString();
@@ -195,8 +189,7 @@ export class ExpensesService {
 
     public async createAndUpdate(modelForm: FormGroup, _categories: CategoryEntity[]): Promise<DTOResponseApi> {
         var objReturn: DTOResponseApi = this.getDefaultObjReturn();
-        try
-        {
+        try {
             const model = modelForm.value;
 
             const responseAmount = this._genericService.parseNumber(model.amount.replace('.', ''));
@@ -219,7 +212,7 @@ export class ExpensesService {
                     response.description = model.description;
                     response.categoryId = model.categoryId;
                     response.category = findCategory;
-        
+
                     await this._indexeddbService.updateItem<TransactionEntity>('transactions', response.transactionId, response).then(response => {
                         objReturn.confirmation = true;
                         objReturn.message = 'Transacción actualizada correctamente';
@@ -228,7 +221,7 @@ export class ExpensesService {
                         objReturn.message = error.message;
                         objReturn.exception = error.toString();
                     });
-                }, error => { 
+                }, error => {
                     console.error(error);
                     objReturn.message = error.message;
                     objReturn.exception = error.toString();
@@ -255,8 +248,7 @@ export class ExpensesService {
                 });
             }
         }
-        catch (error: any)
-        {
+        catch (error: any) {
             console.error(error);
             objReturn.message = error.message;
             objReturn.exception = error.toString();
@@ -266,8 +258,7 @@ export class ExpensesService {
 
     public async delete(transactionId: string): Promise<DTOResponseApi> {
         var objReturn: DTOResponseApi = this.getDefaultObjReturn();
-        try
-        {
+        try {
             await this._indexeddbService.deleteItem('transactions', transactionId).then(response => {
                 objReturn.confirmation = true;
                 objReturn.message = 'Transacción eliminada correctamente';
@@ -277,8 +268,7 @@ export class ExpensesService {
                 objReturn.exception = error.toString();
             });
         }
-        catch (error: any)
-        {
+        catch (error: any) {
             console.error(error);
             objReturn.message = error.message;
             objReturn.exception = error.toString();
@@ -288,8 +278,7 @@ export class ExpensesService {
 
     private getChartOptions(_transactions: DTOTransaction[], _categories: CategoryEntity[], _localStorage: any): DTOResponseApiWithData<Highcharts.Options> {
         var objReturn: DTOResponseApiWithData<Highcharts.Options> = this.getDefaultObjReturnWithData();
-        try
-        {
+        try {
             const data: {
                 id: string;
                 name: string;
@@ -298,14 +287,14 @@ export class ExpensesService {
                 sliced: boolean;
             }[] = [];
             const total = _transactions.reduce((a, b) => a + b.amount, 0);
-    
+
             for (let i = 0; i < _categories.length; i++) {
                 const item = _categories[i];
                 const amount = _transactions.reduce((a, b) => a + (b.categoryId === item.categoryId ? b.amount : 0), 0);
                 const amountString = this._genericService.convertToCurrencyFormat(amount).data;
                 const porcent: number = total > 0 ? ((amount * 100) / total) : 0;
                 const porcentString = this._genericService.parseNumber(porcent.toFixed(2)).data;
-    
+
                 data.push({
                     id: item.categoryId,
                     name: `${item.name} (${_localStorage.currency} ${amountString})`,
@@ -314,15 +303,15 @@ export class ExpensesService {
                     sliced: false,
                 });
             }
-    
+
             if (data.length > 0) {
                 const findHightPorcent = data.reduce((a, b) => a.y > b.y ? a : b);
                 findHightPorcent.name = `<b style="color: var(--color-green); font-size: 0.9rem;">${findHightPorcent.name}</b>`;
             }
-    
+
             objReturn.data = {
                 title: {
-                    text: 'Distribución de ingresos',
+                    text: 'Distribución de gastos',
                 },
                 subtitle: {
                     text: _transactions.length > 0 ? '' : 'Sin datos',
@@ -342,8 +331,7 @@ export class ExpensesService {
             objReturn.confirmation = true;
             objReturn.message = 'Opciones del gráfico cargadas correctamente';
         }
-        catch (error: any)
-        {
+        catch (error: any) {
             console.error(error);
             objReturn.message = error.message;
             objReturn.exception = error.toString();

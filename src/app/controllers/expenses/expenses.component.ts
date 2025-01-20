@@ -1,5 +1,5 @@
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ModalComponent } from 'src/app/shared/partials/modal/modal.component';
 import { FormsModule } from '@angular/forms';
 import { InputNumberComponent } from 'src/app/shared/partials/inputnumber/inputnumber.component';
@@ -16,6 +16,7 @@ import { TableComponent } from 'src/app/shared/partials/table/table.component';
 import { ModalConfirmationComponent } from 'src/app/shared/partials/modalconfirmation/modalconfirmation.component';
 import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTable';
 import { ExpensesService } from './expenses.service';
+import { DTOLocalStorage } from 'src/app/shared/dto/generic';
 Highcharts.setOptions(darkTheme); // Aplica el tema
 
 @Component({
@@ -28,33 +29,41 @@ Highcharts.setOptions(darkTheme); // Aplica el tema
 })
 
 export class ExpensesComponent implements OnInit {
-  constructor() { }
+  constructor() {}
 
+  //#region injectables
   public readonly _genericService = inject(GenericService);
   public readonly _expensesService = inject(ExpensesService);
+  //#endregion
+
+  //#region variables
+  public _form: FormGroup | null = null;
+  public _transactions: DTOTransaction[] = [];
+  public _selectedTransaction: DTOTransaction | null = null;
+  public _categories: CategoryEntity[] = [];
+  public _chart: Chart | null = null;
 
   public _modals = {
-    income: false,
-    deleteIncome: false,
+    transaction: false,
+    deleteTransaction: false,
   };
-  public _form: FormGroup | null = null;
-  public _incomes: DTOTransaction[] = [];
-  public _selectedIncome: DTOTransaction | null = null;
-  public _categories: CategoryEntity[] = [];
 
-  public chart: Chart | null = null;
-  public _options: DTOPartialTableOptions = {
+  public _partialTableOptions: DTOPartialTableOptions = {
     search: '',
     skip: 0,
     take: 5,
     total: 0,
   };
 
-  public _localStorage: {
-    currency: string;
-  } = {
+  public _localStorage: DTOLocalStorage = {
     currency: this._genericService.getLocalStorage<string>('currency') || '$',
+    language: this._genericService.getLocalStorage<string>('language') || 'es',
   };
+  //#endregion
+
+  //#region signals
+  public _totalAmountSignal: WritableSignal<string> = signal<string>('-');
+  //#endregion
 
   ngOnInit(): void {
     this.loadCategories();
@@ -68,7 +77,7 @@ export class ExpensesComponent implements OnInit {
 
   public async loadCategories(): Promise<void> {
     const response = await this._expensesService.loadCategories();
-    if(!response.confirmation) {
+    if (!response.confirmation) {
       return;
     }
     this._categories = response.data;
@@ -76,74 +85,80 @@ export class ExpensesComponent implements OnInit {
   }
 
   public async loadTable(): Promise<void> {
-    const response = await this._expensesService.loadTable(this._options, this._incomes, this._categories, this._localStorage, this.chart);
-    if(!response.confirmation) {
+    const response = await this._expensesService.loadTable(this._partialTableOptions, this._transactions, this._categories, this._localStorage, this._chart);
+    if (!response.confirmation) {
       return;
     }
-    
-    this._options = response.data.options;
-    this._incomes = response.data.transactions;
+
+    this._partialTableOptions = response.data.partialTableOptions;
+    this._transactions = response.data.transactions;
     this._categories = response.data.categories;
-    this.chart = response.data.chart;
+    this._chart = response.data.chart;
+    this.loadTotalAmount();
   }
 
   public onOpenModal(item: DTOTransaction | null = null): void {
-    var response = this._expensesService.modalOpen(this._form, this._selectedIncome, this._categories, item);
-    if(!response.confirmation) {
+    var response = this._expensesService.modalOpen(this._form, this._selectedTransaction, this._categories, item);
+    if (!response.confirmation) {
       alert(response.message);
       return;
     }
 
     this._form = response.data.form;
-    this._selectedIncome = response.data.selectedIncome;
-    this._modals.income = true;
+    this._selectedTransaction = response.data.selectedIncome;
+    this._modals.transaction = true;
   }
 
-  public closeModal(): void {
-    this._modals.income = false;
+  public onCloseModal(): void {
+    this._modals.transaction = false;
     this._form = null;
   }
 
-  public async submitForm(modelForm: FormGroup): Promise<void> {
+  public async onSubmitForm(modelForm: FormGroup): Promise<void> {
     var response = await this._expensesService.createAndUpdate(modelForm, this._categories);
-    if(!response.confirmation) {
+    if (!response.confirmation) {
       alert(response.message);
       return;
     }
-    this._modals.income = false;
+    this._modals.transaction = false;
     this.loadTable();
   }
 
-  public modalOpenDelete(item: DTOTransaction): void {
-    this._selectedIncome = item;
-    this._modals.deleteIncome = true;
+  public onModalOpenDelete(item: DTOTransaction): void {
+    this._selectedTransaction = item;
+    this._modals.deleteTransaction = true;
   }
 
   public async onDelete(item: DTOTransaction): Promise<void> {
     const response = await this._expensesService.delete(item.transactionId);
-    if(!response.confirmation) {
+    if (!response.confirmation) {
       alert(response.message);
       return;
     }
-    this._modals.deleteIncome = false;
+    this._modals.deleteTransaction = false;
     this.loadTable();
   }
 
-  public getTotal(): number {
-    return this._incomes.reduce((a, b) => a + b.amount, 0);
+  public loadTotalAmount(): void {
+    const response = this._genericService.convertToCurrencyFormat(this._transactions.reduce((a, b) => a + b.amount, 0));
+    if (!response.confirmation) {
+      return;
+    }
+
+    this._totalAmountSignal.set(`${this._localStorage.currency} ${response.data}`);
   }
 
-  public loadPartialTable(item: DTOPartialTableOptions): void {
-    this._options = item;
+  public onLoadPartialTable(item: DTOPartialTableOptions): void {
+    this._partialTableOptions = item;
   }
 
-  public changePartialTable(item: DTOPartialTableOptions): void {
-    this._options = item;
+  public onChangePartialTable(item: DTOPartialTableOptions): void {
+    this._partialTableOptions = item;
     this.loadTable();
   }
 
   public search(event: any): void {
-    this._options.search = event.target.value;
+    this._partialTableOptions.search = event.target.value;
     this.loadTable();
   }
 

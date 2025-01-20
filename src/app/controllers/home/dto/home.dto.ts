@@ -15,3 +15,12 @@ export interface DTOModalOpen {
     selectedIncome: DTOTransaction | null;
     form: FormGroup | null;
 }
+
+export interface DTOResults {
+    incomes: DTOTransaction[];
+    expenses: DTOTransaction[];
+    totalIncomes: string;
+    totalExpenses: string;
+    total: string;
+    totalInt: number;
+}

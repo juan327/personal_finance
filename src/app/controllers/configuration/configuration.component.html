@@ -23,12 +23,12 @@
         <hr>
 
         
-        <partial-table [_values]="this._categories" [_options]="this._options" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">
+        <partial-table [_values]="this._categories" [_options]="this._partialTableOptions" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">
             <ng-template #caption>
                 <div class="caption">
                     <h2>Categorias</h2>
-                    <button type="button" class="btn success" (click)="this.openModal()">Agregar categoria</button>
-                    <input type="text" placeholder="Busqueda rapida..." (input)="this.search($event)">
+                    <button type="button" class="btn success" (click)="this.onOpenModal()">Agregar categoria</button>
+                    <input type="text" placeholder="Busqueda rapida..." (input)="this.onSearch($event)">
                 </div>
             </ng-template>
             <ng-template #header>
@@ -47,10 +47,10 @@
                     <td>
                         @if(!item.isDefault) {
                             <div class="operations">
-                                <button type="button" class="btn primary" title="Editar" (click)="this.openModal(item)">
+                                <button type="button" class="btn primary" title="Editar" (click)="this.onOpenModal(item)">
                                     <i class="pi pi-pen-to-square"></i>
                                 </button>  
-                                <button type="button" class="btn danger" title="Eliminar" (click)="this.modalOpenDelete(item)">
+                                <button type="button" class="btn danger" title="Eliminar" (click)="this.onModalOpenDelete(item)">
                                     <i class="pi pi-trash"></i>
                                 </button>
                             </div>
@@ -64,8 +64,8 @@
 </section>
 
 @if(this._modals.category && this._form !== null) {
-<form [formGroup]="this._form" (ngSubmit)="this.submitForm(this._form)">
-    <partial-modal (eventCloseModal)="this.closeModal()">
+<form [formGroup]="this._form" (ngSubmit)="this.onSubmitForm(this._form)">
+    <partial-modal (eventCloseModal)="this.onCloseModal()">
         <ng-template #header>
             <h2>{{this._form.get('opcLabel')?.value}} categoria</h2>
         </ng-template>
@@ -78,7 +78,7 @@
                 <div class="form-group">
                     <label for="type">Tipo</label>
                     <select formControlName="type" id="type" name="type" required>
-                        @for (item of this._types; track $index) {
+                        @for (item of this._categoryTypes; track $index) {
                         <option [value]="item.value">{{item.label}}</option>
                         }
                     </select>

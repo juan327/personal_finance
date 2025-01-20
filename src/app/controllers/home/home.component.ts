@@ -10,10 +10,11 @@ import { HighchartService } from 'src/app/shared/services/highchart.service';
 import * as Highcharts from 'highcharts';
 import { Chart } from 'highcharts';
 import { darkTheme } from 'src/app/shared/themes/highcharts/highcharts.dark.theme'; // Importa el tema
-import { DTOHighchartSeries } from 'src/app/shared/dto/generic';
-import { IndexeddbService } from 'src/app/shared/services/indexeddb.service';
+import { DTOHighchartSeries, DTOLocalStorage } from 'src/app/shared/dto/generic';
 import { TableComponent } from 'src/app/shared/partials/table/table.component';
 import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTable';
+import { DTOResults } from './dto/home.dto';
+import { HomeService } from './home.service';
 Highcharts.setOptions(darkTheme); // Aplica el tema
 
 @Component({
@@ -22,7 +23,7 @@ Highcharts.setOptions(darkTheme); // Aplica el tema
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   standalone: true,
-  providers: [DatePipe, DecimalPipe, GenericService],
+  providers: [HomeService, DatePipe, DecimalPipe, GenericService],
 })
 
 export class HomeComponent implements OnInit {
@@ -30,18 +31,11 @@ export class HomeComponent implements OnInit {
 
   public readonly _genericService = inject(GenericService);
   public readonly _highchartService = inject(HighchartService);
-  private readonly _indexeddbService = inject(IndexeddbService);
+  private readonly _homeService = inject(HomeService);
 
   public _transactions: DTOTransaction[] = [];
   public _categories: CategoryEntity[] = [];
-  public _results: {
-    incomes: DTOTransaction[],
-    expenses: DTOTransaction[],
-    totalIncomes: string,
-    totalExpenses: string,
-    total: string,
-    totalInt: number,
-  } = {
+  public _results: DTOResults = {
       incomes: [],
       expenses: [],
       totalIncomes: '0',
@@ -49,19 +43,18 @@ export class HomeComponent implements OnInit {
       total: '0',
       totalInt: 0,
     };
-  public _options: DTOPartialTableOptions = {
+  public _partialTableOptions: DTOPartialTableOptions = {
     search: '',
     skip: 0,
     take: 5,
     total: 0,
   };
 
-  public chart: Chart | null = null;
+  public _chart: Chart | null = null;
 
-  public _localStorage: {
-    currency: string;
-  } = {
+  public _localStorage: DTOLocalStorage = {
     currency: this._genericService.getLocalStorage<string>('currency') || '$',
+    language: this._genericService.getLocalStorage<string>('language') || 'es',
   };
 
   ngOnInit(): void {
@@ -75,161 +68,35 @@ export class HomeComponent implements OnInit {
 
   }
 
-  private loadTable(): void {
-    this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
-      if (response.total > 0) {
-        this._options.total = response.total;
-        this._transactions = response.items.map((item: TransactionEntity) => {
-          const objReturn: DTOTransaction = {
-            transactionId: item.transactionId,
-            name: item.name,
-            amount: item.amount,
-            amountString: `${this._localStorage.currency} ${this._genericService.convertToCurrencyFormat(item.amount).data}`,
-            date: item.date,
-            description: item.description,
-            categoryId: item.categoryId,
-            categoryName: item.category.name,
-            categoryType: item.category.type,
-            created: item.created,
-          };
-          return objReturn;
-        });
-      }
+  public async loadTable(): Promise<void> {
+    const response = await this._homeService.loadTable(this._partialTableOptions, this._transactions, this._categories, this._localStorage, this._chart);
+    if (!response.confirmation) {
+      return;
+    }
 
-      const options: Highcharts.Options = this.getChartOptions();
-      if (this._transactions.length > 1 && this.chart !== null) {
-        this._highchartService.updateChart(this.chart, options);
-      } else {
-        this.chart = this._highchartService.buildChart('container', options);
-      }
-      this.updateResults();
-    }, error => {
-      console.error(error);
-    });
+    this._partialTableOptions = response.data.partialTableOptions;
+    this._transactions = response.data.transactions;
+    this._categories = response.data.categories;
+    this._chart = response.data.chart;
+    this.updateResults();
   }
 
-  public updateResults(): void {
-    const incomes = this._transactions.filter(c => c.categoryType === 1);
-    const expenses = this._transactions.filter(c => c.categoryType === 2);
-
-    const totalIncomes = incomes.reduce((a, b) => a + b.amount, 0);
-    const totalExpenses = expenses.reduce((a, b) => a + b.amount, 0);
-
-    const responsetotalIncomes = this._genericService.convertToCurrencyFormat(totalIncomes);
-    if (!responsetotalIncomes.confirmation) {
-      alert(responsetotalIncomes.message);
-      return;
-    }
-    const responseTotalExpenses = this._genericService.convertToCurrencyFormat(totalExpenses);
-    if (!responseTotalExpenses.confirmation) {
-      alert(responseTotalExpenses.message);
-      return;
-    }
-    const responseTotal = this._genericService.convertToCurrencyFormat(totalIncomes - totalExpenses);
-    if (!responseTotal.confirmation) {
-      alert(responseTotal.message);
+  public async updateResults(): Promise<void> {
+    const response = await this._homeService.updateResults(this._results, this._transactions);
+    if (!response.confirmation) {
       return;
     }
 
-    this._results.incomes = incomes;
-    this._results.expenses = expenses;
-    this._results.totalIncomes = responsetotalIncomes.data;
-    this._results.totalExpenses = responseTotalExpenses.data;
-    this._results.total = responseTotal.data;
-    this._results.totalInt = totalIncomes - totalExpenses;
-  }
-
-  private getChartOptions(): Highcharts.Options {
-    const dataIncomes: {
-      name: string;
-      y: number;
-    }[] = [];
-    const dataExpenses: {
-      name: string;
-      y: number;
-    }[] = [];
-
-    const categories = this._genericService.getMonthsFromYear(2025);
-
-    for (let i = 0; i < categories.length; i++) {
-      const item = categories[i];
-      const amountIncomes = this._transactions.reduce((a, b) => a + (b.categoryType === 1 && b.date >= item.dateStart && b.date <= item.dateEnd ? b.amount : 0), 0);
-      const amountExpenses = this._transactions.reduce((a, b) => a + (b.categoryType === 2 && b.date >= item.dateStart && b.date <= item.dateEnd ? b.amount : 0), 0);
-
-      const responseIncomes = this._genericService.convertToNumberDecimal(amountIncomes);
-      if (!responseIncomes.confirmation) {
-        continue;
-      }
-      const responseExpenses = this._genericService.convertToNumberDecimal(amountExpenses);
-      if (!responseExpenses.confirmation) {
-        continue;
-      }
-
-      dataIncomes.push({
-        name: item.name,
-        y: responseIncomes.data,
-      });
-
-      dataExpenses.push({
-        name: item.name,
-        y: responseExpenses.data,
-      });
-    }
-
-    const series: DTOHighchartSeries<any>[] = [
-      {
-        name: 'Ingresos',
-        data: dataIncomes,
-        color: 'var(--color-green)',
-      },
-      {
-        name: 'Gastos',
-        data: dataExpenses,
-        color: 'var(--color-red)',
-      }
-    ];
-    console.log(series);
-
-    return {
-      chart: {
-        type: 'column'
-      },
-      title: {
-        text: 'Rendimiento del año'
-      },
-      xAxis: {
-        categories: categories.map(c => c.name),
-        crosshair: true,
-        accessibility: {
-          description: 'Countries'
-        }
-      },
-      yAxis: {
-        min: 0,
-        title: {
-          text: 'AÑO 2025'
-        }
-      },
-      plotOptions: {
-        column: {
-          pointPadding: 0.2,
-          borderWidth: 0
-        }
-      },
-      tooltip: {
-        valuePrefix: this._localStorage.currency + ' '
-      },
-      series: series as any
-    };
+    this._results = response.data;
   }
 
   public loadPartialTable(item: DTOPartialTableOptions): void {
-    this._options = item;
+    this._partialTableOptions = item;
     this.loadTable();
   }
 
   public changePartialTable(item: DTOPartialTableOptions): void {
-    this._options = item;
+    this._partialTableOptions = item;
     this.loadTable();
   }
 

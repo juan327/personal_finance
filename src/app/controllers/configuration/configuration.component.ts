@@ -4,13 +4,12 @@ import { ModalComponent } from 'src/app/shared/partials/modal/modal.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { GenericService } from 'src/app/shared/services/generic.service';
-import { TransactionEntity } from 'src/app/shared/entities/transaction';
 import { CategoryEntity } from 'src/app/shared/entities/category';
 
-import { IndexeddbService } from 'src/app/shared/services/indexeddb.service';
 import { TableComponent } from 'src/app/shared/partials/table/table.component';
 import { ModalConfirmationComponent } from 'src/app/shared/partials/modalconfirmation/modalconfirmation.component';
 import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTable';
+import { ConfigurationService } from './configuration.service';
 
 @Component({
   selector: 'app-configuration',
@@ -18,18 +17,18 @@ import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTab
   templateUrl: './configuration.component.html',
   styleUrl: './configuration.component.css',
   standalone: true,
-  providers: [GenericService, DatePipe, DecimalPipe],
+  providers: [ConfigurationService, GenericService, DatePipe, DecimalPipe],
 })
 
 export class ConfigurationComponent implements OnInit {
   constructor() { }
 
   public readonly _genericService = inject(GenericService);
-  public readonly _indexeddbService = inject(IndexeddbService);
-  private readonly _fb = inject(FormBuilder);
+  private readonly _configurationService = inject(ConfigurationService);
 
   public _categories: CategoryEntity[] = [];
   public _selectedCategory: CategoryEntity | null = null;
+
   public _selectedCurrency: string = '$';
   public _currencies: {
     value: string;
@@ -44,7 +43,7 @@ export class ConfigurationComponent implements OnInit {
   }[] = [
       { value: 'en', label: 'English' }, { value: 'es', label: 'Español' }
     ];
-  public _options: DTOPartialTableOptions = {
+  public _partialTableOptions: DTOPartialTableOptions = {
     search: '',
     skip: 0,
     take: 5,
@@ -56,7 +55,7 @@ export class ConfigurationComponent implements OnInit {
     category: false,
     deleteCategory: false,
   };
-  public _types: {
+  public _categoryTypes: {
     value: number;
     label: string;
   }[] = [
@@ -78,119 +77,69 @@ export class ConfigurationComponent implements OnInit {
   ngOnDestroy(): void {
   }
 
-  public loadTable(): void {
-    this._indexeddbService.getAllItems<CategoryEntity>('categories', 'created', 'desc').then(response => {
-      if (response.total > 0) {
-        const search = this._options.search.trim().toLowerCase();
-        this._categories = response.items.filter(c => c.name.toLowerCase().includes(search));
-        this._options.total = this._categories.length;
-      }
-    }, error => {
-      console.error(error);
-    });
-  }
-
-  public openModal(item: CategoryEntity | null = null): void {
-    if (item !== null) {
-      this._selectedCategory = item;
-      this._form = this._fb.group({
-        opc: ['Edit'],
-        opcLabel: ['Editar'],
-        categoryId: [item.categoryId, [Validators.required]],
-        name: [item.name, [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
-        type: [item.type, [Validators.required]],
-      });
-    } else {
-      this._form = this._fb.group({
-        opc: ['Create'],
-        opcLabel: ['Crear'],
-        name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
-        type: [1, [Validators.required]],
-      });
-    }
-    this._modals.category = true;
-  }
-
-  public closeModal(): void {
-    this._modals.category = false;
-  }
-
-  public async submitForm(modelForm: FormGroup): Promise<void> {
-    const model = modelForm.value;
-    const responseInt = this._genericService.parseNumber(model.type);
-    if(!responseInt.confirmation) {
-      alert(responseInt.message);
+  public async loadTable(): Promise<void> {
+    const response = await this._configurationService.loadTable(this._partialTableOptions, this._categories);
+    if (!response.confirmation) {
       return;
     }
 
-    if (model.opc === 'Edit') {
-      this._indexeddbService.getItem<CategoryEntity>('categories', model.categoryId).then(response => {
-        response.name = model.name;
-        response.type = responseInt.data;
-
-        this._indexeddbService.updateItem<CategoryEntity>('categories', response.categoryId, response).then(response => {
-          this._modals.category = false;
-          this.loadTable();
-        }, error => {
-          console.error(error);
-        });
-      }, error => {
-        console.error(error);
-      });
-    } else {
-      const newObj: CategoryEntity = {
-        categoryId: this._genericService.generateGuid(),
-        name: model.name,
-        type: responseInt.data,
-        created: new Date(),
-        isDefault: false,
-      };
-
-      this._indexeddbService.addItem<CategoryEntity>('categories', newObj).then(response => {
-        this._modals.category = false;
-        this.loadTable();
-      }, error => {
-        console.error(error);
-      });
-    }
+    this._partialTableOptions = response.data.partialTableOptions;
+    this._categories = response.data.categories;
   }
 
-  public modalOpenDelete(item: CategoryEntity): void {
+  public onOpenModal(item: CategoryEntity | null = null): void {
+    var response = this._configurationService.modalOpen(this._form, this._selectedCategory, this._categories, item);
+    if (!response.confirmation) {
+      alert(response.message);
+      return;
+    }
+
+    this._form = response.data.form;
+    this._selectedCategory = response.data.selectedCategory;
+    this._modals.category = true;
+  }
+
+  public onCloseModal(): void {
+    this._modals.category = false;
+  }
+
+  public async onSubmitForm(modelForm: FormGroup): Promise<void> {
+    var response = await this._configurationService.createAndUpdate(modelForm, this._categories);
+    if (!response.confirmation) {
+      alert(response.message);
+      return;
+    }
+    this._modals.category = false;
+    this.loadTable();
+  }
+
+  public onModalOpenDelete(item: CategoryEntity): void {
     this._selectedCategory = item;
     this._modals.deleteCategory = true;
   }
 
-  public onDelete(item: CategoryEntity): void {
-    this._indexeddbService.deleteItem('categories', item.categoryId).then(response => {
-      this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
-        if (response.total > 0) {
-          response.items.filter(c => c.categoryId === item.categoryId).forEach(async item => {
-            await this._indexeddbService.deleteItem('transactions', item.transactionId);
-          });
-        }
-      }, error => {
-        console.error(error);
-      });
-
-      this._modals.deleteCategory = false;
-      this.loadTable();
-    }, error => {
-      console.error(error);
-    });
+  public async onDelete(item: CategoryEntity): Promise<void> {
+    const response = await this._configurationService.delete(item.categoryId);
+    if (!response.confirmation) {
+      alert(response.message);
+      return;
+    }
+    this._modals.deleteCategory = false;
+    this.loadTable();
   }
 
   public loadPartialTable(item: DTOPartialTableOptions): void {
-    this._options = item;
+    this._partialTableOptions = item;
     this.loadTable();
   }
 
   public changePartialTable(item: DTOPartialTableOptions): void {
-    this._options = item;
+    this._partialTableOptions = item;
     this.loadTable();
   }
 
-  public search(event: any): void {
-    this._options.search = event.target.value;
+  public onSearch(event: any): void {
+    this._partialTableOptions.search = event.target.value;
     this.loadTable();
   }
 
