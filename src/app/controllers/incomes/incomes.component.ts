@@ -98,14 +98,14 @@ export class IncomesComponent implements OnInit {
   }
 
   public onOpenModal(item: DTOTransaction | null = null): void {
-    var response = this._incomesService.modalOpen(this._form, this._selectedTransaction, this._categories, item);
+    var response = this._incomesService.modalOpen(this._categories, item);
     if (!response.confirmation) {
       alert(response.message);
       return;
     }
 
-    this._form = response.data.form;
-    this._selectedTransaction = response.data.selectedIncome;
+    this._form = response.data;
+    this._selectedTransaction = item;
     this._modals.transaction = true;
   }
 
@@ -115,7 +115,7 @@ export class IncomesComponent implements OnInit {
   }
 
   public async onSubmitForm(modelForm: FormGroup): Promise<void> {
-    var response = await this._incomesService.createAndUpdate(modelForm, this._categories);
+    var response = await this._incomesService.createOrUpdate(modelForm, this._categories);
     if (!response.confirmation) {
       alert(response.message);
       return;

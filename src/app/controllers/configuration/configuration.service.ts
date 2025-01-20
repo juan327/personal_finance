@@ -6,7 +6,7 @@ import { IndexeddbService } from 'src/app/shared/services/indexeddb.service';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { CategoryEntity } from 'src/app/shared/entities/category';
 import { DTOLoadTable, DTOModalOpen } from './dto/configuration.dto';
-import { DTOResponseApi, DTOResponseApiWithData } from 'src/app/shared/dto/generic';
+import { DTOResponse, DTOResponseWithData } from 'src/app/shared/dto/generic';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TransactionEntity } from 'src/app/shared/entities/transaction';
 //#endregion
@@ -25,31 +25,13 @@ export class ConfigurationService {
     //#endregion
 
     /**
-     * Devuelve un objeto con los valores por defecto de un DTOResponseApi
-     * @returns DTOResponseApi
+     * Carga las categorías para la tabla
+     * @param _partialTableOptions Opciones del partial table
+     * @param _categories Categorías cargadas
+     * @returns Promise<DTOResponseWithData<DTOLoadTable>>
      */
-    private getDefaultObjReturn(): DTOResponseApi {
-        return {
-            message: '',
-            confirmation: false,
-        };
-    }
-
-    /**
-     * Devuelve un objeto con los valores por defecto de un DTOResponseApiWithData
-     * @returns DTOResponseApiWithData
-     */
-    private getDefaultObjReturnWithData<T>(): DTOResponseApiWithData<T> {
-        return {
-            message: '',
-            confirmation: false,
-            data: null as T,
-        };
-    }
-
-    public async loadTable(_partialTableOptions: DTOPartialTableOptions, _categories: CategoryEntity[]): Promise<DTOResponseApiWithData<DTOLoadTable>> {
-
-        var objReturn: DTOResponseApiWithData<DTOLoadTable> = this.getDefaultObjReturnWithData();
+    public async loadTable(_partialTableOptions: DTOPartialTableOptions, _categories: CategoryEntity[]): Promise<DTOResponseWithData<DTOLoadTable>> {
+        var objReturn: DTOResponseWithData<DTOLoadTable> = new DTOResponseWithData<DTOLoadTable>();
         try {
             await this._indexeddbService.getAllItems<CategoryEntity>('categories', 'created', 'desc').then(response => {
               if (response.total > 0) {
@@ -76,12 +58,17 @@ export class ConfigurationService {
         return objReturn;
     }
 
-    public modalOpen(_form: FormGroup | null, _selectedCategory: CategoryEntity | null, _categories: CategoryEntity[], item: CategoryEntity | null = null): DTOResponseApiWithData<DTOModalOpen> {
-        var objReturn: DTOResponseApiWithData<DTOModalOpen> = this.getDefaultObjReturnWithData();
+    /**
+     * Devuelve el modal abierto
+     * @param _categories Categorías cargadas
+     * @param item Categoria seleccionada
+     * @returns DTOResponseWithData<DTOModalOpen>
+     */
+    public modalOpen(_categories: CategoryEntity[], item: CategoryEntity | null = null): DTOResponseWithData<FormGroup> {
+        var objReturn: DTOResponseWithData<FormGroup> = new DTOResponseWithData<FormGroup>();
         try {
             if (item !== null) {
-              _selectedCategory = item;
-              _form = this._fb.group({
+              objReturn.data = this._fb.group({
                 opc: ['Edit'],
                 opcLabel: ['Editar'],
                 categoryId: [item.categoryId, [Validators.required]],
@@ -89,7 +76,7 @@ export class ConfigurationService {
                 type: [item.type, [Validators.required]],
               });
             } else {
-              _form = this._fb.group({
+              objReturn.data = this._fb.group({
                 opc: ['Create'],
                 opcLabel: ['Crear'],
                 name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
@@ -97,10 +84,6 @@ export class ConfigurationService {
               });
             }
 
-            objReturn.data = {
-                selectedCategory: _selectedCategory,
-                form: _form,
-            };
             objReturn.confirmation = true;
             objReturn.message = 'Modal abierto correctamente';
         }
@@ -112,8 +95,13 @@ export class ConfigurationService {
         return objReturn;
     }
 
-    public async createAndUpdate(modelForm: FormGroup, _categories: CategoryEntity[]): Promise<DTOResponseApi> {
-        var objReturn: DTOResponseApi = this.getDefaultObjReturn();
+    /**
+     * Crea o actualiza la categoría
+     * @param modelForm Formulario cargado
+     * @returns Promise<DTOResponse>
+     */
+    public async createOrUpdate(modelForm: FormGroup): Promise<DTOResponse> {
+        var objReturn: DTOResponse = new DTOResponse();
         try
         {
             const model = modelForm.value;
@@ -169,8 +157,13 @@ export class ConfigurationService {
         return objReturn;
     }
 
-    public async delete(categoryId: string): Promise<DTOResponseApi> {
-        var objReturn: DTOResponseApi = this.getDefaultObjReturn();
+    /**
+     * Elimina la categoría
+     * @param categoryId Id de la categoría
+     * @returns Promise<DTOResponse>
+     */
+    public async delete(categoryId: string): Promise<DTOResponse> {
+        var objReturn: DTOResponse = new DTOResponse();
         try {
             await this._indexeddbService.deleteItem('categories', categoryId).then(response => {
               this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {

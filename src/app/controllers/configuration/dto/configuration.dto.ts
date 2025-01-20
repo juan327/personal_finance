@@ -9,6 +9,5 @@ export interface DTOLoadTable {
 }
 
 export interface DTOModalOpen {
-    selectedCategory: CategoryEntity | null;
     form: FormGroup | null;
 }

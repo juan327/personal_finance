@@ -10,10 +10,8 @@ import { Chart } from 'highcharts';
 import { HighchartService } from 'src/app/shared/services/highchart.service';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { CategoryEntity } from 'src/app/shared/entities/category';
-import { DTOLoadTable, DTOModalOpen, DTOResults } from './dto/home.dto';
-import { DTOHighchartSeries, DTOLocalStorage, DTOResponseApi, DTOResponseApiWithData } from 'src/app/shared/dto/generic';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DecimalValidator } from 'src/app/shared/validators/decimal.validator';
+import { DTOLoadTable, DTOResults } from './dto/home.dto';
+import { DTOHighchartSeries, DTOLocalStorage, DTOResponseWithData } from 'src/app/shared/dto/generic';
 //#endregion
 
 @Injectable({
@@ -27,36 +25,21 @@ export class HomeService {
     private readonly _indexeddbService = inject(IndexeddbService);
     private readonly _highchartService = inject(HighchartService);
     private readonly _genericService = inject(GenericService);
-    private readonly _fb = inject(FormBuilder);
     //#endregion
-
+    
     /**
-     * Devuelve un objeto con los valores por defecto de un DTOResponseApi
-     * @returns DTOResponseApi
+     * Carga las transacciones para la tabla
+     * @param _partialTableOptions Opciones del partial table
+     * @param _transactions Transacciones cargadas
+     * @param _categories Categorías cargadas
+     * @param _localStorage LocalStorage cargado
+     * @param _chart Gráfico cargado
+     * @returns Promise<DTOResponseWithData<DTOLoadTable>>
      */
-    private getDefaultObjReturn(): DTOResponseApi {
-        return {
-            message: '',
-            confirmation: false,
-        };
-    }
-
-    /**
-     * Devuelve un objeto con los valores por defecto de un DTOResponseApiWithData
-     * @returns DTOResponseApiWithData
-     */
-    private getDefaultObjReturnWithData<T>(): DTOResponseApiWithData<T> {
-        return {
-            message: '',
-            confirmation: false,
-            data: null as T,
-        };
-    }
-
     public async loadTable(_partialTableOptions: DTOPartialTableOptions, _transactions: DTOTransaction[], _categories: CategoryEntity[],
-        _localStorage: DTOLocalStorage, _chart: Chart | null): Promise<DTOResponseApiWithData<DTOLoadTable>> {
+        _localStorage: DTOLocalStorage, _chart: Chart | null): Promise<DTOResponseWithData<DTOLoadTable>> {
         
-        var objReturn: DTOResponseApiWithData<DTOLoadTable> = this.getDefaultObjReturnWithData();
+        var objReturn: DTOResponseWithData<DTOLoadTable> = new DTOResponseWithData<DTOLoadTable>();
         try
         {
             await this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
@@ -112,9 +95,15 @@ export class HomeService {
         return objReturn;
     }
 
-    public updateResults(_results: DTOResults, _transactions: DTOTransaction[]): DTOResponseApiWithData<DTOResults> {
-        var objReturn: DTOResponseApiWithData<DTOResults> = this.getDefaultObjReturnWithData();
-        try 
+    /**
+     * Actualiza los resultados
+     * @param _results Resultados cargados
+     * @param _transactions Transacciones cargadas
+     * @returns DTOResponseWithData<DTOResults>
+     */
+    public updateResults(_results: DTOResults, _transactions: DTOTransaction[]): DTOResponseWithData<DTOResults> {
+        var objReturn: DTOResponseWithData<DTOResults> = new DTOResponseWithData<DTOResults>();
+        try
         {
             const incomes = _transactions.filter(c => c.categoryType === 1);
             const expenses = _transactions.filter(c => c.categoryType === 2);
@@ -158,8 +147,14 @@ export class HomeService {
         return objReturn;
     }
 
-    private getChartOptions(_transactions: DTOTransaction[], _localStorage: any): DTOResponseApiWithData<Highcharts.Options> {
-        var objReturn: DTOResponseApiWithData<Highcharts.Options> = this.getDefaultObjReturnWithData();
+    /**
+     * Devuelve las opciones del gráfico
+     * @param _transactions Transacciones cargadas
+     * @param _localStorage LocalStorage cargado
+     * @returns DTOResponseWithData<Highcharts.Options>
+     */
+    private getChartOptions(_transactions: DTOTransaction[], _localStorage: any): DTOResponseWithData<Highcharts.Options> {
+        var objReturn: DTOResponseWithData<Highcharts.Options> = new DTOResponseWithData<Highcharts.Options>();
         try {
             const dataIncomes: {
                 name: string;
@@ -241,6 +236,8 @@ export class HomeService {
                 },
                 series: series as any
             };
+            objReturn.confirmation = true;
+            objReturn.message = 'Opciones del gráfico cargadas correctamente';
         }
         catch (error: any)
         {

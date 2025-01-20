@@ -1,8 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { inject, Injectable, OnInit } from '@angular/core';
-import { DTOResponseApi, DTOResponseApiWithData } from '../dto/generic';
-import { CategoryEntity } from '../entities/category';
-import { TransactionEntity } from '../entities/transaction';
+import { inject, Injectable } from '@angular/core';
+import { DTOResponseWithData } from '../dto/generic';
 
 @Injectable({
     providedIn: 'root',
@@ -14,10 +12,20 @@ export class GenericService {
     private readonly _datePipe = inject(DatePipe);
     private readonly _decimalPipe = inject(DecimalPipe);
     
+    /**
+     * Setea el valor de un LocalStorage
+     * @param key Llave del LocalStorage
+     * @param value Valor del LocalStorage
+     */
     public setLocalStorage(key: string, value: any): void {
         localStorage.setItem(key, JSON.stringify(value));
     }
 
+    /**
+     * Obtiene el valor de un LocalStorage en base al tipo de dato que se ingrese
+     * @param key Llave del LocalStorage
+     * @returns T | null
+     */
     public getLocalStorage<T>(key: string): T | null {
         const value = localStorage.getItem(key);
         if (value === null || value === 'null' || value === 'undefined' || value === '' || value === undefined) {
@@ -26,15 +34,27 @@ export class GenericService {
         return JSON.parse(value);
     }
 
+    /**
+     * Elimina el valor de un LocalStorage
+     * @param key Llave del LocalStorage
+     */
     public removeLocalStorage(key: string): void {
         localStorage.removeItem(key);
     }
 
+    /**
+     * Setea el idioma
+     * @param language Idioma a establecer (es o en)
+     */
     public setLanguage(language: string): void {
         this.setLocalStorage('language', language);
         //this._languageSubject.next(language);
     }
 
+    /**
+     * Obtiene el idioma
+     * @returns string
+     */
     public getLanguage(): string {
         const language = this.getLocalStorage<string>('language');
         if(language === null) {
@@ -43,6 +63,11 @@ export class GenericService {
         return language;
     }
 
+    /**
+     * Obtiene la fecha y hora actual en UTC.
+     * 
+     * @returns Date
+     */
     public getDateTimeNow(): Date {
         try {
             var dateTimeNow: Date = new Date();
@@ -64,7 +89,7 @@ export class GenericService {
     /**
      * Obtiene la fecha y hora actual en UTC.
      * 
-     * @returns {Date} - La fecha y hora actual en UTC.
+     * @returns Date
      */
     public getDateTimeNowUtc(): Date {
         try {
@@ -84,6 +109,11 @@ export class GenericService {
         }
     }
 
+    /**
+     * Formatea una fecha a yyyy-MM-ddThh:mm:ss.mmm
+     * @param date Fecha a formatear
+     * @returns string
+     */
     public formatDateTotring(date: Date): string {
         const year = this._datePipe.transform(date, 'yyyy');
         const month = this._datePipe.transform(date, 'MM');
@@ -96,14 +126,30 @@ export class GenericService {
         return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
     }
 
+    /**
+     * Transforma una fecha a un string
+     * @param date Fecha a transformar
+     * @param format Formato de la fecha (default yyyy-MM-dd)
+     * @returns string | null
+     */
     public transformDateToString(date: Date, format: string = 'yyyy-MM-dd'): string | null {
         return this._datePipe.transform(date, format);
     }
 
-    private padWithZeros(num: number, length: number): string {
-        return num.toString().padStart(length, '0');
+    /**
+     * Agrega ceros a la izquierda de un número
+     * @param number Número a agregar ceros
+     * @param length Longitud del número
+     * @returns string
+     */
+    private padWithZeros(number: number, length: number): string {
+        return number.toString().padStart(length, '0');
     }
 
+    /**
+     * Genera un guid
+     * @returns string
+     */
     public generateGuid(): string {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             const r = Math.random() * 16 | 0;
@@ -112,8 +158,13 @@ export class GenericService {
         });
     }
 
-    public parseNumber(text: string): DTOResponseApiWithData<number> {
-        var objReturn: DTOResponseApiWithData<number> = { message: '', exception: '', confirmation: false, data: NaN };
+    /**
+     * Parsea un texto a un número
+     * @param text Texto a parsear
+     * @returns DTOResponseWithData<number>
+     */
+    public parseNumber(text: string): DTOResponseWithData<number> {
+        var objReturn: DTOResponseWithData<number> = { message: '', exception: '', confirmation: false, data: NaN };
         try {
             const convertNumber: number = Number(text); // Usamos Number() para convertir el string a número
             if (isNaN(convertNumber)) {
@@ -131,8 +182,13 @@ export class GenericService {
         return objReturn;
     }
 
-    public convertToCurrencyFormat(value: number): DTOResponseApiWithData<string> {
-        var objReturn: DTOResponseApiWithData<string> = { message: '', exception: '', confirmation: false, data: '' };
+    /**
+     * Convierte un número a formato de moneda
+     * @param value Número a convertir
+     * @returns DTOResponseWithData<string>
+     */
+    public convertToCurrencyFormat(value: number): DTOResponseWithData<string> {
+        var objReturn: DTOResponseWithData<string> = { message: '', exception: '', confirmation: false, data: '' };
         try {
             // Convertimos el número a cadena y agregamos ceros si es necesario
             let monto = value.toString().padStart(3, '0');  // Asegura que tenga al menos 3 caracteres
@@ -157,8 +213,13 @@ export class GenericService {
         return objReturn;
     }
 
-    public convertToNumberDecimal(value: number): DTOResponseApiWithData<number> {
-        var objReturn: DTOResponseApiWithData<number> = { message: '', exception: '', confirmation: false, data: 0 };
+    /**
+     * Convierte un número a formato decimal
+     * @param value Número a convertir
+     * @returns DTOResponseWithData<number>
+     */
+    public convertToNumberDecimal(value: number): DTOResponseWithData<number> {
+        var objReturn: DTOResponseWithData<number> = { message: '', exception: '', confirmation: false, data: 0 };
         try {
             // Convertimos el número a cadena y agregamos ceros si es necesario
             let monto = value.toString().padStart(3, '0');  // Asegura que tenga al menos 3 caracteres
@@ -183,6 +244,11 @@ export class GenericService {
         return objReturn;
     }
 
+    /**
+     * Transforma un número a formato de moneda
+     * @param value Número a transformar
+     * @returns string
+     */
     public transformNumberToCurrencyFormat(value: number): string {
         return this._decimalPipe.transform(value, '1.2-2') || '0.00';
     }

@@ -12,6 +12,5 @@ export interface DTOLoadTable {
 }
 
 export interface DTOModalOpen {
-    selectedIncome: DTOTransaction | null;
     form: FormGroup | null;
 }

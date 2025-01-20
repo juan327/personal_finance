@@ -1,11 +1,22 @@
-export interface DTOResponseApi {
+export class DTOResponse {
     message: string;
-    exception?: string;
+    exception: string;
     confirmation: boolean;
+
+    constructor() {
+        this.message = '';
+        this.exception = '';
+        this.confirmation = false;
+    }
 }
 
-export interface DTOResponseApiWithData<T> extends DTOResponseApi {
+export class DTOResponseWithData<T> extends DTOResponse {
     data: T;
+
+    constructor() {
+        super();
+        this.data = null as T;
+    }
 }
 
 export interface DTOHighchartSeries<T> {

@@ -11,7 +11,7 @@ import { HighchartService } from 'src/app/shared/services/highchart.service';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { CategoryEntity } from 'src/app/shared/entities/category';
 import { DTOLoadTable, DTOModalOpen } from './dto/incomes.dto';
-import { DTOLocalStorage, DTOResponseApi, DTOResponseApiWithData } from 'src/app/shared/dto/generic';
+import { DTOLocalStorage, DTOResponse, DTOResponseWithData } from 'src/app/shared/dto/generic';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DecimalValidator } from 'src/app/shared/validators/decimal.validator';
 //#endregion
@@ -35,34 +35,11 @@ export class IncomesService {
     //#endregion
 
     /**
-     * Devuelve un objeto con los valores por defecto de un DTOResponseApi
-     * @returns DTOResponseApi
-     */
-    private getDefaultObjReturn(): DTOResponseApi {
-        return {
-            message: '',
-            confirmation: false,
-        };
-    }
-
-    /**
-     * Devuelve un objeto con los valores por defecto de un DTOResponseApiWithData
-     * @returns DTOResponseApiWithData
-     */
-    private getDefaultObjReturnWithData<T>(): DTOResponseApiWithData<T> {
-        return {
-            message: '',
-            confirmation: false,
-            data: null as T,
-        };
-    }
-
-    /**
      * Carga todas las categorías
-     * @returns Promise<DTOResponseApiWithData<CategoryEntity[]>>
+     * @returns Promise<DTOResponseWithData<CategoryEntity[]>>
      */
-    public async loadCategories(): Promise<DTOResponseApiWithData<CategoryEntity[]>> {
-        var objReturn: DTOResponseApiWithData<CategoryEntity[]> = this.getDefaultObjReturnWithData();
+    public async loadCategories(): Promise<DTOResponseWithData<CategoryEntity[]>> {
+        var objReturn: DTOResponseWithData<CategoryEntity[]> = new DTOResponseWithData<CategoryEntity[]>();
         try {
             await this._indexeddbService.getAllItems<CategoryEntity>('categories', 'name', 'desc').then(response => {
                 objReturn.data = response.items.filter(c => c.type === this._categoryType);
@@ -82,10 +59,19 @@ export class IncomesService {
         return objReturn;
     }
 
+    /**
+     * Carga las transacciones para la tabla
+     * @param _partialTableOptions Opciones del partial table
+     * @param _transactions Transacciones cargadas
+     * @param _categories Categorías cargadas
+     * @param _localStorage LocalStorage cargado
+     * @param _chart Gráfico cargado
+     * @returns Promise<DTOResponseWithData<DTOLoadTable>>
+     */
     public async loadTable(_partialTableOptions: DTOPartialTableOptions, _transactions: DTOTransaction[], _categories: CategoryEntity[],
-        _localStorage: DTOLocalStorage, _chart: Chart | null): Promise<DTOResponseApiWithData<DTOLoadTable>> {
+        _localStorage: DTOLocalStorage, _chart: Chart | null): Promise<DTOResponseWithData<DTOLoadTable>> {
 
-        var objReturn: DTOResponseApiWithData<DTOLoadTable> = this.getDefaultObjReturnWithData();
+        var objReturn: DTOResponseWithData<DTOLoadTable> = new DTOResponseWithData<DTOLoadTable>();
         try {
             await this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
                 if (response.total > 0) {
@@ -144,12 +130,17 @@ export class IncomesService {
         return objReturn;
     }
 
-    public modalOpen(_form: FormGroup | null, _selectedIncome: DTOTransaction | null, _categories: CategoryEntity[], item: DTOTransaction | null = null): DTOResponseApiWithData<DTOModalOpen> {
-        var objReturn: DTOResponseApiWithData<DTOModalOpen> = this.getDefaultObjReturnWithData();
+    /**
+     * Devuelve el modal abierto
+     * @param _categories Categorías cargadas
+     * @param item Transacción seleccionada
+     * @returns DTOResponseWithData<FormGroup>
+     */
+    public modalOpen(_categories: CategoryEntity[], item: DTOTransaction | null = null): DTOResponseWithData<FormGroup> {
+        var objReturn: DTOResponseWithData<FormGroup> = new DTOResponseWithData<FormGroup>();
         try {
             if (item !== null) {
-                _selectedIncome = item;
-                _form = this._fb.group({
+                objReturn.data = this._fb.group({
                     opc: ['Edit'],
                     opcLabel: ['Editar'],
                     transactionId: [item.transactionId, [Validators.required]],
@@ -160,8 +151,7 @@ export class IncomesService {
                     description: [item.description],
                 });
             } else {
-                _selectedIncome = null;
-                _form = this._fb.group({
+                objReturn.data = this._fb.group({
                     opc: ['Create'],
                     opcLabel: ['Crear'],
                     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
@@ -172,10 +162,6 @@ export class IncomesService {
                 });
             }
 
-            objReturn.data = {
-                selectedIncome: _selectedIncome,
-                form: _form,
-            };
             objReturn.confirmation = true;
             objReturn.message = 'Modal abierto correctamente';
         }
@@ -187,8 +173,14 @@ export class IncomesService {
         return objReturn;
     }
 
-    public async createAndUpdate(modelForm: FormGroup, _categories: CategoryEntity[]): Promise<DTOResponseApi> {
-        var objReturn: DTOResponseApi = this.getDefaultObjReturn();
+    /**
+     * Crea o actualiza la transacción
+     * @param modelForm Formulario cargado
+     * @param _categories Categorías cargadas
+     * @returns Promise<DTOResponse>
+     */
+    public async createOrUpdate(modelForm: FormGroup, _categories: CategoryEntity[]): Promise<DTOResponse> {
+        var objReturn: DTOResponse = new DTOResponse();
         try {
             const model = modelForm.value;
 
@@ -256,8 +248,13 @@ export class IncomesService {
         return objReturn;
     }
 
-    public async delete(transactionId: string): Promise<DTOResponseApi> {
-        var objReturn: DTOResponseApi = this.getDefaultObjReturn();
+    /**
+     * Elimina la transacción
+     * @param transactionId Id de la transacción
+     * @returns Promise<DTOResponse>
+     */
+    public async delete(transactionId: string): Promise<DTOResponse> {
+        var objReturn: DTOResponse = new DTOResponse();
         try {
             await this._indexeddbService.deleteItem('transactions', transactionId).then(response => {
                 objReturn.confirmation = true;
@@ -276,8 +273,15 @@ export class IncomesService {
         return objReturn;
     }
 
-    private getChartOptions(_transactions: DTOTransaction[], _categories: CategoryEntity[], _localStorage: any): DTOResponseApiWithData<Highcharts.Options> {
-        var objReturn: DTOResponseApiWithData<Highcharts.Options> = this.getDefaultObjReturnWithData();
+    /**
+     * Devuelve las opciones del gráfico
+     * @param _transactions Transacciones cargadas
+     * @param _categories Categorías cargadas
+     * @param _localStorage LocalStorage cargado
+     * @returns DTOResponseWithData<Highcharts.Options>
+     */
+    private getChartOptions(_transactions: DTOTransaction[], _categories: CategoryEntity[], _localStorage: any): DTOResponseWithData<Highcharts.Options> {
+        var objReturn: DTOResponseWithData<Highcharts.Options> = new DTOResponseWithData<Highcharts.Options>();
         try {
             const data: {
                 id: string;

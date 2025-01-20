@@ -88,14 +88,14 @@ export class ConfigurationComponent implements OnInit {
   }
 
   public onOpenModal(item: CategoryEntity | null = null): void {
-    var response = this._configurationService.modalOpen(this._form, this._selectedCategory, this._categories, item);
+    var response = this._configurationService.modalOpen(this._categories, item);
     if (!response.confirmation) {
       alert(response.message);
       return;
     }
 
-    this._form = response.data.form;
-    this._selectedCategory = response.data.selectedCategory;
+    this._form = response.data;
+    this._selectedCategory = item;
     this._modals.category = true;
   }
 
@@ -104,7 +104,7 @@ export class ConfigurationComponent implements OnInit {
   }
 
   public async onSubmitForm(modelForm: FormGroup): Promise<void> {
-    var response = await this._configurationService.createAndUpdate(modelForm, this._categories);
+    var response = await this._configurationService.createOrUpdate(modelForm);
     if (!response.confirmation) {
       alert(response.message);
       return;
