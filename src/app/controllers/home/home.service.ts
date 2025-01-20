@@ -12,6 +12,7 @@ import { GenericService } from 'src/app/shared/services/generic.service';
 import { CategoryEntity } from 'src/app/shared/entities/category';
 import { DTOLoadTable, DTOResults } from './dto/home.dto';
 import { DTOHighchartSeries, DTOLocalStorage, DTOResponseWithData } from 'src/app/shared/dto/generic';
+import { EnumTableName } from 'src/app/shared/enums/generic.enum';
 //#endregion
 
 @Injectable({
@@ -42,7 +43,7 @@ export class HomeService {
         var objReturn: DTOResponseWithData<DTOLoadTable> = new DTOResponseWithData<DTOLoadTable>();
         try
         {
-            await this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
+            await this._indexeddbService.getAllItems<TransactionEntity>(EnumTableName.transactions, 'created', 'desc').then(response => {
                 if (response.total > 0) {
                     _partialTableOptions.total = response.total;
                     _transactions = response.items.map((item: TransactionEntity) => {
@@ -56,7 +57,7 @@ export class HomeService {
                             categoryId: item.categoryId,
                             categoryName: item.category.name,
                             categoryType: item.category.type,
-                            created: item.created,
+                            created: this._genericService.addMinutesToDate(item.created, _localStorage.minutesOfDifferenceTimeZone),
                         };
                         return objReturn;
                     });

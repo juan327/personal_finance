@@ -34,4 +34,5 @@ export interface DTOResponseListPagination<T> {
 export interface DTOLocalStorage {
     currency: string;
     language: string;
+    minutesOfDifferenceTimeZone: number;
 }

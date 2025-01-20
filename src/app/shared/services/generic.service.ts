@@ -276,4 +276,16 @@ export class GenericService {
       });
     }
 
+    /**
+     * Agrega una cantidad de minutos a una fecha dada.
+     * @param date - La fecha a la que se agregarán los minutos.
+     * @param minutes - La cantidad de minutos a agregar.
+     * @returns Una nueva instancia de Date con los minutos agregados.
+     */
+    public addMinutesToDate(date: Date, minutes: number): Date {
+        const nuevaFecha = new Date(date); // Crear una copia de la fecha original
+        nuevaFecha.setMinutes(nuevaFecha.getMinutes() + minutes);
+        return nuevaFecha;
+    }
+
 }

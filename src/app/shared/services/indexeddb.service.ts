@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DTOResponseListPagination } from '../dto/generic';
+import { EnumTableName } from '../enums/generic.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ export class IndexeddbService {
    * @param tables Tablas a crear
    */
   public initDB(tables: {
-    tableName: string,
+    tableName: EnumTableName,
     primaryKey: string,
     indexes: {
       name: string,
@@ -48,7 +49,7 @@ export class IndexeddbService {
    * @param data Elemento a agregar
    * @returns Promise<any>
    */
-  public addItem<T>(tableName: string, data: T): Promise<any> {
+  public addItem<T>(tableName: EnumTableName, data: T): Promise<any> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName);
 
@@ -73,7 +74,7 @@ export class IndexeddbService {
    * @param sortOrder Orden de la tabla (asc o desc)
    * @returns Promise<DTOResponseListPagination<T>>
    */
-  public getAllItems<T>(tableName: string, orderBy: string, sortOrder: 'asc' | 'desc' = 'asc'): Promise<DTOResponseListPagination<T>> {
+  public getAllItems<T>(tableName: EnumTableName, orderBy: string, sortOrder: 'asc' | 'desc' = 'asc'): Promise<DTOResponseListPagination<T>> {
     return new Promise((resolve, reject) => {
       const requestDB = indexedDB.open(this.dbName);
 
@@ -112,7 +113,7 @@ export class IndexeddbService {
    * @param id Id del elemento
    * @returns Promise<T>
    */
-  public getItem<T>(tableName: string, id: string): Promise<T> {
+  public getItem<T>(tableName: EnumTableName, id: string): Promise<T> {
     return new Promise((resolve, reject) => {
       const requestDB = indexedDB.open(this.dbName);
 
@@ -139,7 +140,7 @@ export class IndexeddbService {
    * @param tableName Nombre de la tabla
    * @returns Promise<number>
    */
-  public getTotalRecords(tableName: string): Promise<number> {
+  public getTotalRecords(tableName: EnumTableName): Promise<number> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName);
 
@@ -163,7 +164,7 @@ export class IndexeddbService {
    * @param id Id del elemento
    * @returns Promise<void>
    */
-  public deleteItem(tableName: string, id: string): Promise<void> {
+  public deleteItem(tableName: EnumTableName, id: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName);
 
@@ -188,7 +189,7 @@ export class IndexeddbService {
    * @param data Elemento a actualizar
    * @returns Promise<void>
    */
-  public updateItem<T>(tableName: string, id: string, data: T): Promise<void> {
+  public updateItem<T>(tableName: EnumTableName, id: string, data: T): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName);
 

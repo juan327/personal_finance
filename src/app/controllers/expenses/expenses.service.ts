@@ -14,6 +14,7 @@ import { DTOLoadTable, DTOModalOpen } from './dto/expenses.dto';
 import { DTOLocalStorage, DTOResponse, DTOResponseWithData } from 'src/app/shared/dto/generic';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DecimalValidator } from 'src/app/shared/validators/decimal.validator';
+import { EnumTableName } from 'src/app/shared/enums/generic.enum';
 //#endregion
 
 @Injectable({
@@ -31,7 +32,7 @@ export class ExpensesService {
     //#endregion
 
     //#region private properties
-    private readonly _categoryType: number = 1;
+    private readonly _categoryType: number = 2;
     //#endregion
 
     /**
@@ -41,7 +42,7 @@ export class ExpensesService {
     public async loadCategories(): Promise<DTOResponseWithData<CategoryEntity[]>> {
         var objReturn: DTOResponseWithData<CategoryEntity[]> = new DTOResponseWithData<CategoryEntity[]>();
         try {
-            await this._indexeddbService.getAllItems<CategoryEntity>('categories', 'name', 'desc').then(response => {
+            await this._indexeddbService.getAllItems<CategoryEntity>(EnumTableName.categories, 'name', 'desc').then(response => {
                 objReturn.data = response.items.filter(c => c.type === this._categoryType);
                 objReturn.confirmation = true;
                 objReturn.message = 'Categorías cargadas correctamente';
@@ -73,7 +74,7 @@ export class ExpensesService {
 
         var objReturn: DTOResponseWithData<DTOLoadTable> = new DTOResponseWithData<DTOLoadTable>();
         try {
-            await this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
+            await this._indexeddbService.getAllItems<TransactionEntity>(EnumTableName.transactions, 'created', 'desc').then(response => {
                 if (response.total > 0) {
                     const search = _partialTableOptions.search.trim().toLowerCase();
                     _transactions = response.items.filter(c => c.category.type === this._categoryType
@@ -90,7 +91,7 @@ export class ExpensesService {
                                     categoryId: item.categoryId,
                                     categoryName: item.category.name,
                                     categoryType: item.category.type,
-                                    created: item.created,
+                                    created: this._genericService.addMinutesToDate(item.created, _localStorage.minutesOfDifferenceTimeZone),
                                 };
                                 return objReturn;
                             });
@@ -197,7 +198,7 @@ export class ExpensesService {
             }
 
             if (model.opc === 'Edit') {
-                await this._indexeddbService.getItem<TransactionEntity>('transactions', model.transactionId).then(async response => {
+                await this._indexeddbService.getItem<TransactionEntity>(EnumTableName.transactions, model.transactionId).then(async response => {
                     response.name = model.name;
                     response.amount = responseAmount.data;
                     response.date = new Date(model.date);
@@ -205,7 +206,7 @@ export class ExpensesService {
                     response.categoryId = model.categoryId;
                     response.category = findCategory;
 
-                    await this._indexeddbService.updateItem<TransactionEntity>('transactions', response.transactionId, response).then(response => {
+                    await this._indexeddbService.updateItem<TransactionEntity>(EnumTableName.transactions, response.transactionId, response).then(response => {
                         objReturn.confirmation = true;
                         objReturn.message = 'Transacción actualizada correctamente';
                     }, error => {
@@ -227,10 +228,10 @@ export class ExpensesService {
                     description: model.description,
                     categoryId: model.categoryId,
                     category: findCategory,
-                    created: new Date(),
+                    created: this._genericService.getDateTimeNowUtc(),
                 };
 
-                await this._indexeddbService.addItem<TransactionEntity>('transactions', newObj).then(response => {
+                await this._indexeddbService.addItem<TransactionEntity>(EnumTableName.transactions, newObj).then(response => {
                     objReturn.confirmation = true;
                     objReturn.message = 'Transacción creada correctamente';
                 }, error => {
@@ -256,7 +257,7 @@ export class ExpensesService {
     public async delete(transactionId: string): Promise<DTOResponse> {
         var objReturn: DTOResponse = new DTOResponse();
         try {
-            await this._indexeddbService.deleteItem('transactions', transactionId).then(response => {
+            await this._indexeddbService.deleteItem(EnumTableName.transactions, transactionId).then(response => {
                 objReturn.confirmation = true;
                 objReturn.message = 'Transacción eliminada correctamente';
             }, error => {

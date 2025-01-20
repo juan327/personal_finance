@@ -10,6 +10,7 @@ import { TableComponent } from 'src/app/shared/partials/table/table.component';
 import { ModalConfirmationComponent } from 'src/app/shared/partials/modalconfirmation/modalconfirmation.component';
 import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTable';
 import { ConfigurationService } from './configuration.service';
+import { DTOLocalStorage } from 'src/app/shared/dto/generic';
 
 @Component({
   selector: 'app-configuration',
@@ -63,6 +64,12 @@ export class ConfigurationComponent implements OnInit {
       { value: 2, label: 'Gasto' },
     ];
 
+  public _localStorage: DTOLocalStorage = {
+    currency: this._genericService.getLocalStorage<string>('currency') || '$',
+    language: this._genericService.getLocalStorage<string>('language') || 'es',
+    minutesOfDifferenceTimeZone: -300,
+  };
+
   ngOnInit(): void {
     this._selectedCurrency = this._genericService.getLocalStorage<string>('currency') || '$';
     this.loadTable();
@@ -78,7 +85,7 @@ export class ConfigurationComponent implements OnInit {
   }
 
   public async loadTable(): Promise<void> {
-    const response = await this._configurationService.loadTable(this._partialTableOptions, this._categories);
+    const response = await this._configurationService.loadTable(this._partialTableOptions, this._categories, this._localStorage);
     if (!response.confirmation) {
       return;
     }

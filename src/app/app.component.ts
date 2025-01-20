@@ -5,6 +5,7 @@ import { IndexeddbService } from './shared/services/indexeddb.service';
 import { CategoryEntity } from './shared/entities/category';
 import { GenericService } from './shared/services/generic.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { EnumTableName } from './shared/enums/generic.enum';
 
 @Component({
   selector: 'app-root',
@@ -24,22 +25,22 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     const tables = [
-      {tableName: 'categories', primaryKey: 'categoryId', indexes: [{name: 'categoryId', unique: true}, {name: 'name', unique: false}, {name: 'created', unique: false}]},
-      {tableName: 'transactions', primaryKey: 'transactionId', indexes: [{name: 'transactionId', unique: true}, {name: 'name', unique: false}, {name: 'created', unique: false}]},
+      {tableName: EnumTableName.categories, primaryKey: 'categoryId', indexes: [{name: 'categoryId', unique: true}, {name: 'name', unique: false}, {name: 'created', unique: false}]},
+      {tableName: EnumTableName.transactions, primaryKey: 'transactionId', indexes: [{name: 'transactionId', unique: true}, {name: 'name', unique: false}, {name: 'created', unique: false}]},
     ];
 
     this._indexeddbService.initDB(tables);
     
-    this._indexeddbService.getAllItems<CategoryEntity>('categories', 'created', 'asc').then(response => {
+    this._indexeddbService.getAllItems<CategoryEntity>(EnumTableName.categories, 'created', 'asc').then(response => {
       if(response.total <= 0) {
-        this._indexeddbService.addItem<CategoryEntity>('categories', {
+        this._indexeddbService.addItem<CategoryEntity>(EnumTableName.categories, {
           categoryId: this._genericService.generateGuid(),
           name: 'Otros',
           type: 1,
           created: new Date(),
           isDefault: true,
         });
-        this._indexeddbService.addItem<CategoryEntity>('categories', {
+        this._indexeddbService.addItem<CategoryEntity>(EnumTableName.categories, {
           categoryId: this._genericService.generateGuid(),
           name: 'Otros',
           type: 2,

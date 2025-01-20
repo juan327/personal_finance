@@ -6,9 +6,10 @@ import { IndexeddbService } from 'src/app/shared/services/indexeddb.service';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { CategoryEntity } from 'src/app/shared/entities/category';
 import { DTOLoadTable, DTOModalOpen } from './dto/configuration.dto';
-import { DTOResponse, DTOResponseWithData } from 'src/app/shared/dto/generic';
+import { DTOLocalStorage, DTOResponse, DTOResponseWithData } from 'src/app/shared/dto/generic';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TransactionEntity } from 'src/app/shared/entities/transaction';
+import { EnumTableName } from 'src/app/shared/enums/generic.enum';
 //#endregion
 
 @Injectable({
@@ -30,13 +31,22 @@ export class ConfigurationService {
      * @param _categories Categorías cargadas
      * @returns Promise<DTOResponseWithData<DTOLoadTable>>
      */
-    public async loadTable(_partialTableOptions: DTOPartialTableOptions, _categories: CategoryEntity[]): Promise<DTOResponseWithData<DTOLoadTable>> {
+    public async loadTable(_partialTableOptions: DTOPartialTableOptions, _categories: CategoryEntity[], _localStorage: DTOLocalStorage): Promise<DTOResponseWithData<DTOLoadTable>> {
         var objReturn: DTOResponseWithData<DTOLoadTable> = new DTOResponseWithData<DTOLoadTable>();
         try {
-            await this._indexeddbService.getAllItems<CategoryEntity>('categories', 'created', 'desc').then(response => {
+            await this._indexeddbService.getAllItems<CategoryEntity>(EnumTableName.categories, 'created', 'desc').then(response => {
               if (response.total > 0) {
                 const search = _partialTableOptions.search.trim().toLowerCase();
-                _categories = response.items.filter(c => c.name.toLowerCase().includes(search));
+                _categories = response.items.filter(c => c.name.toLowerCase().includes(search)).map((item: CategoryEntity) => {
+                  const objReturn: CategoryEntity = {
+                    categoryId: item.categoryId,
+                    name: item.name,
+                    type: item.type,
+                    created: this._genericService.addMinutesToDate(item.created, _localStorage.minutesOfDifferenceTimeZone),
+                    isDefault: item.isDefault,
+                  };
+                  return objReturn;
+                });
                 _partialTableOptions.total = _categories.length;
               }
 
@@ -113,11 +123,11 @@ export class ConfigurationService {
             }
         
             if (model.opc === 'Edit') {
-              await this._indexeddbService.getItem<CategoryEntity>('categories', model.categoryId).then(async response => {
+              await this._indexeddbService.getItem<CategoryEntity>(EnumTableName.categories, model.categoryId).then(async response => {
                 response.name = model.name;
                 response.type = responseInt.data;
         
-                await this._indexeddbService.updateItem<CategoryEntity>('categories', response.categoryId, response).then(response => {
+                await this._indexeddbService.updateItem<CategoryEntity>(EnumTableName.categories, response.categoryId, response).then(response => {
                     objReturn.confirmation = true;
                     objReturn.message = 'Categoria actualizada correctamente';
                 }, error => {
@@ -135,11 +145,11 @@ export class ConfigurationService {
                 categoryId: this._genericService.generateGuid(),
                 name: model.name,
                 type: responseInt.data,
-                created: new Date(),
+                created: this._genericService.getDateTimeNowUtc(),
                 isDefault: false,
               };
         
-              await this._indexeddbService.addItem<CategoryEntity>('categories', newObj).then(response => {
+              await this._indexeddbService.addItem<CategoryEntity>(EnumTableName.categories, newObj).then(response => {
                 objReturn.confirmation = true;
                 objReturn.message = 'Categoria creada correctamente';
               }, error => {
@@ -165,11 +175,11 @@ export class ConfigurationService {
     public async delete(categoryId: string): Promise<DTOResponse> {
         var objReturn: DTOResponse = new DTOResponse();
         try {
-            await this._indexeddbService.deleteItem('categories', categoryId).then(response => {
-              this._indexeddbService.getAllItems<TransactionEntity>('transactions', 'created', 'desc').then(response => {
+            await this._indexeddbService.deleteItem(EnumTableName.categories, categoryId).then(response => {
+              this._indexeddbService.getAllItems<TransactionEntity>(EnumTableName.transactions, 'created', 'desc').then(response => {
                 if (response.total > 0) {
                   response.items.filter(c => c.categoryId === categoryId).forEach(async item => {
-                    await this._indexeddbService.deleteItem('transactions', item.transactionId);
+                    await this._indexeddbService.deleteItem(EnumTableName.transactions, item.transactionId);
                   });
                 }
               }, error => {

@@ -58,6 +58,7 @@ export class ExpensesComponent implements OnInit {
   public _localStorage: DTOLocalStorage = {
     currency: this._genericService.getLocalStorage<string>('currency') || '$',
     language: this._genericService.getLocalStorage<string>('language') || 'es',
+    minutesOfDifferenceTimeZone: -300,
   };
   //#endregion
 
