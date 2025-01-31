@@ -135,7 +135,7 @@ export class ExpensesService {
      * Devuelve el modal abierto
      * @param _categories Categorías cargadas
      * @param item Transacción seleccionada
-     * @returns DTOResponseWithData<DTOModalOpen>
+     * @returns DTOResponseWithData<FormGroup>
      */
     public modalOpen(_categories: CategoryEntity[], item: DTOTransaction | null = null): DTOResponseWithData<FormGroup> {
         var objReturn: DTOResponseWithData<FormGroup> = new DTOResponseWithData<FormGroup>();
@@ -146,18 +146,19 @@ export class ExpensesService {
                     opcLabel: ['Editar'],
                     transactionId: [item.transactionId, [Validators.required]],
                     name: [item.name, [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
-                    amount: [item.amountString, [Validators.required, DecimalValidator(2)]],
-                    date: [this._genericService.transformDateToString(item.date), [Validators.required]],
+                    amount: [item.amount.toString(), [Validators.required, DecimalValidator(2)]],
+                    date: [item.date, [Validators.required]],
                     categoryId: [item.categoryId, [Validators.required]],
                     description: [item.description],
                 });
             } else {
+                const date = this._genericService.addMinutesToDate(this._genericService.getDateTimeNowUtc(), -300);
                 objReturn.data = this._fb.group({
                     opc: ['Create'],
                     opcLabel: ['Crear'],
                     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
-                    amount: ['', [Validators.required, DecimalValidator(2)]],
-                    date: [this._genericService.transformDateToString(this._genericService.getDateTimeNowUtc()), [Validators.required]],
+                    amount: ['0', [Validators.required, DecimalValidator(2)]],
+                    date: [date, [Validators.required]],
                     categoryId: [_categories[0].categoryId, [Validators.required]],
                     description: [''],
                 });
@@ -316,7 +317,7 @@ export class ExpensesService {
 
             objReturn.data = {
                 title: {
-                    text: 'Distribución de gastos',
+                    text: 'Distribución de ingresos',
                 },
                 subtitle: {
                     text: _transactions.length > 0 ? '' : 'Sin datos',

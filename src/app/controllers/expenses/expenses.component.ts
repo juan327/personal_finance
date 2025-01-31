@@ -17,11 +17,12 @@ import { ModalConfirmationComponent } from 'src/app/shared/partials/modalconfirm
 import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTable';
 import { ExpensesService } from './expenses.service';
 import { DTOLocalStorage } from 'src/app/shared/dto/generic';
+import { InputDatetimeComponent } from 'src/app/shared/partials/inputdatetime/inputdatetime.component';
 Highcharts.setOptions(darkTheme); // Aplica el tema
 
 @Component({
   selector: 'app-expenses',
-  imports: [CommonModule, FormsModule, HighchartsChartModule, ReactiveFormsModule, ModalComponent, InputNumberComponent, TableComponent, ModalConfirmationComponent],
+  imports: [CommonModule, FormsModule, HighchartsChartModule, ReactiveFormsModule, ModalComponent, InputNumberComponent, TableComponent, ModalConfirmationComponent, InputDatetimeComponent],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.css',
   standalone: true,
@@ -33,7 +34,7 @@ export class ExpensesComponent implements OnInit {
 
   //#region injectables
   public readonly _genericService = inject(GenericService);
-  public readonly _expensesService = inject(ExpensesService);
+  public readonly _incomesService = inject(ExpensesService);
   //#endregion
 
   //#region variables
@@ -77,7 +78,7 @@ export class ExpensesComponent implements OnInit {
   }
 
   public async loadCategories(): Promise<void> {
-    const response = await this._expensesService.loadCategories();
+    const response = await this._incomesService.loadCategories();
     if (!response.confirmation) {
       return;
     }
@@ -86,7 +87,7 @@ export class ExpensesComponent implements OnInit {
   }
 
   public async loadTable(): Promise<void> {
-    const response = await this._expensesService.loadTable(this._partialTableOptions, this._transactions, this._categories, this._localStorage, this._chart);
+    const response = await this._incomesService.loadTable(this._partialTableOptions, this._transactions, this._categories, this._localStorage, this._chart);
     if (!response.confirmation) {
       return;
     }
@@ -99,7 +100,7 @@ export class ExpensesComponent implements OnInit {
   }
 
   public onOpenModal(item: DTOTransaction | null = null): void {
-    var response = this._expensesService.modalOpen(this._categories, item);
+    var response = this._incomesService.modalOpen(this._categories, item);
     if (!response.confirmation) {
       alert(response.message);
       return;
@@ -116,7 +117,7 @@ export class ExpensesComponent implements OnInit {
   }
 
   public async onSubmitForm(modelForm: FormGroup): Promise<void> {
-    var response = await this._expensesService.createOrUpdate(modelForm, this._categories);
+    var response = await this._incomesService.createOrUpdate(modelForm, this._categories);
     if (!response.confirmation) {
       alert(response.message);
       return;
@@ -131,7 +132,7 @@ export class ExpensesComponent implements OnInit {
   }
 
   public async onDelete(item: DTOTransaction): Promise<void> {
-    const response = await this._expensesService.delete(item.transactionId);
+    const response = await this._incomesService.delete(item.transactionId);
     if (!response.confirmation) {
       alert(response.message);
       return;

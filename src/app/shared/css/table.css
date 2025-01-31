@@ -8,7 +8,7 @@ partial-table {
             overflow: auto;
             max-height: 400px;
 
-            table {
+            table.partial-table {
                 background-color: var(--color-black);
                 border: 1px solid var(--color-black-border);
                 min-width: 100%;

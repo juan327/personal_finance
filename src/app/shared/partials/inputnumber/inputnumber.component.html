@@ -1,1 +1,1 @@
-<input type="text" [value]="this.value" (input)="this.updateValue($event)" (blur)="this.onBlur($event)" />
+<input type="text" [id]="this._id" [value]="this._value" (input)="this.onUpdateValue($event)" (blur)="this.onBlur($event)" [autocomplete]="this._autocomplete" />

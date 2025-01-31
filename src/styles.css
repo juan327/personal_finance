@@ -6,6 +6,7 @@
 
     --color-black: #18181B;
     --color-black-weight: #09090B;
+    --color-black-light: #52525b;
     --color-black-text: #A1A1A6;
     --color-black-border: #27272A;
 
@@ -95,7 +96,7 @@ input, textarea, select {
     padding: 10px;
     border-radius: 5px;
     background-color: var(--color-black-weight);
-    border: 1px solid var(--color-black-border);
+    border: 1px solid var(--color-black-light);
     color: #fff;
     font-size: 1.1rem;
     transition: border 0.3s ease;

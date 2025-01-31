@@ -1,0 +1,100 @@
+<div class="container">
+    <input type="text" [value]="this._value" [autocomplete]="this._autocomplete" readonly />
+    <i class="input-icon pi pi-calendar" (click)="this.onShowCalendar()"></i>
+    
+    @if(this._showCalendar && this._month !== null && this._selectedDay !== null) {
+        <div class="content-calendar" #contentCalendar (click)="this.onClickOutsideCalendar($event, contentCalendar)">
+            <div class="calendar">
+                <div class="header">
+                    <i class="header-back pi pi-angle-left" (click)="this.onChangeBackMonth()"></i>
+                    <div class="header-title">
+                        @if(this._typeBody === 'days') {
+                            <span (click)="this._typeBody = 'months'">{{this._month.monthString}}</span>
+                        }
+                        @if(this._typeBody !== 'years') {
+                            <span (click)="this.onChangeTypeBody('years')">{{this._month.year}}</span>
+                        }
+                    </div>
+                    <i class="header-next pi pi-angle-right" (click)="this.onChangeNextMonth()"></i>
+                </div>
+                <hr>
+                @switch (this._typeBody) {
+                    @case ('days') {
+                        <div class="body-days">
+                            <div class="week">
+                                <span>Do.</span>
+                                <span>Lu.</span>
+                                <span>Ma.</span>
+                                <span>Mi.</span>
+                                <span>Ju.</span>
+                                <span>Vi.</span>
+                                <span>Sa.</span>
+                            </div>
+        
+                            <div class="days">
+                                @for (item of this._month.days; track item.code) {
+                                    <span [class.actual-month]="item.isActualMonth"
+                                        [class.active]="this._selectedDay.code === item.code"
+                                        (click)="this.onSelectDay(item)">{{item.datetime | date: 'd'}}
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+                    @case ('months') {
+                        <div class="body-months">
+                            <span (click)="this.onSelectMonth(1)">Enero</span>
+                            <span (click)="this.onSelectMonth(2)">Febrero</span>
+                            <span (click)="this.onSelectMonth(3)">Marzo</span>
+                            <span (click)="this.onSelectMonth(4)">Abril</span>
+                            <span (click)="this.onSelectMonth(5)">Mayo</span>
+                            <span (click)="this.onSelectMonth(6)">Junio</span>
+                            <span (click)="this.onSelectMonth(7)">Julio</span>
+                            <span (click)="this.onSelectMonth(8)">Agosto</span>
+                            <span (click)="this.onSelectMonth(9)">Septiembre</span>
+                            <span (click)="this.onSelectMonth(10)">Octubre</span>
+                            <span (click)="this.onSelectMonth(11)">Noviembre</span>
+                            <span (click)="this.onSelectMonth(12)">Diciembre</span>
+                        </div>
+                    }
+                    @case ('years') {
+                        <div class="body-years">
+                            @for (item of this._listYears; track $index) {
+                                <span (click)="this.onChangeYear(item)">{{item}}</span>
+                            }
+                        </div>
+                    }
+                }
+                <hr>
+                <div class="content-time">
+                    <div class="time-selector">
+                        <i class="pi pi-angle-up" (click)="this.onChangeTime(60)"></i>
+                        <span>{{this._selectedDay.datetime | date: 'hh'}}</span>
+                        <i class="pi pi-angle-down" (click)="this.onChangeTime(-60)"></i>
+                    </div>
+                    <div class="time-separator">
+                        <span>:</span>
+                    </div>
+                    <div class="time-selector">
+                        <i class="pi pi-angle-up" (click)="this.onChangeTime(1)"></i>
+                        <span>{{this._selectedDay.datetime | date: 'mm'}}</span>
+                        <i class="pi pi-angle-down" (click)="this.onChangeTime(-1)"></i>
+                    </div>
+                    <div class="time-separator">
+                        <span>:</span>
+                    </div>
+                    <div class="time-selector">
+                        <i class="pi pi-angle-up" (click)="this.onChangeTime(720)"></i>
+                        <span>{{this._selectedDay.datetime | date: 'a'}}</span>
+                        <i class="pi pi-angle-down" (click)="this.onChangeTime(-720)"></i>
+                    </div>
+                </div>
+                <hr>
+                <div class="footer">
+                    <button type="button" class="btn danger" (click)="this.onClearDatetime()">Limpiar</button>
+                    <button type="button" class="btn primary" (click)="this.onSelectDatetimeNow()">Hoy</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

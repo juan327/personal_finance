@@ -146,18 +146,19 @@ export class IncomesService {
                     opcLabel: ['Editar'],
                     transactionId: [item.transactionId, [Validators.required]],
                     name: [item.name, [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
-                    amount: [item.amountString, [Validators.required, DecimalValidator(2)]],
-                    date: [this._genericService.transformDateToString(item.date), [Validators.required]],
+                    amount: [item.amount.toString(), [Validators.required, DecimalValidator(2)]],
+                    date: [item.date, [Validators.required]],
                     categoryId: [item.categoryId, [Validators.required]],
                     description: [item.description],
                 });
             } else {
+                const date = this._genericService.addMinutesToDate(this._genericService.getDateTimeNowUtc(), -300);
                 objReturn.data = this._fb.group({
                     opc: ['Create'],
                     opcLabel: ['Crear'],
                     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
-                    amount: ['', [Validators.required, DecimalValidator(2)]],
-                    date: [this._genericService.transformDateToString(this._genericService.getDateTimeNowUtc()), [Validators.required]],
+                    amount: ['0', [Validators.required, DecimalValidator(2)]],
+                    date: [date, [Validators.required]],
                     categoryId: [_categories[0].categoryId, [Validators.required]],
                     description: [''],
                 });

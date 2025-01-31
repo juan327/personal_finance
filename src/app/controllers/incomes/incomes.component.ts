@@ -17,11 +17,12 @@ import { ModalConfirmationComponent } from 'src/app/shared/partials/modalconfirm
 import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTable';
 import { IncomesService } from './incomes.service';
 import { DTOLocalStorage } from 'src/app/shared/dto/generic';
+import { InputDatetimeComponent } from 'src/app/shared/partials/inputdatetime/inputdatetime.component';
 Highcharts.setOptions(darkTheme); // Aplica el tema
 
 @Component({
   selector: 'app-incomes',
-  imports: [CommonModule, FormsModule, HighchartsChartModule, ReactiveFormsModule, ModalComponent, InputNumberComponent, TableComponent, ModalConfirmationComponent],
+  imports: [CommonModule, FormsModule, HighchartsChartModule, ReactiveFormsModule, ModalComponent, InputNumberComponent, TableComponent, ModalConfirmationComponent, InputDatetimeComponent],
   templateUrl: './incomes.component.html',
   styleUrl: './incomes.component.css',
   standalone: true,

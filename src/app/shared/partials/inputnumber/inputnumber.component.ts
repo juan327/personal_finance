@@ -1,70 +1,67 @@
 import { Component, ContentChild, EventEmitter, forwardRef, inject, Input, OnInit, Output, TemplateRef } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'partial-inputnumber',
   templateUrl: './inputnumber.component.html',
   styleUrl: './inputnumber.component.css',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => InputNumberComponent),
-      multi: true,
-    },
-  ],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule]
 })
 
 export class InputNumberComponent implements OnInit {
   constructor() { }
 
-  public value: string = '';
-  private onChange = (value: string) => { };
-  private onTouched = () => { };
+  public _value: string = '';
+  @Input() public _id: string = '';
+  @Input() public _formControlName: string = '';
+  @Input() public _autocomplete: string = '';
+  @Input() public _form: FormGroup | null = null;
 
   ngOnInit(): void {
+    if(this._form !== null) {
+      this._value = this.parseNumberString(this._form.controls[this._formControlName].value as string);
+    }
   }
 
   ngAfterViewInit(): void {
-    this.onChange(this.value);
-    this.onTouched();
-  }
-
-  ngAfterContentInit(): void {
   }
 
   ngOnDestroy(): void {
 
   }
 
-  private writeValue(value: string): void {
-    this.value = this.resetNumber(value, '.00');
+  private parseNumberString(value: string): string {
+    if(value === null || value === undefined || value === '') {
+      return '0.00';
+    }
+    if(value.includes('.')) {
+      return value;
+    }
+    if(value.length >= 3) {
+      const decimal = value.slice(-2);
+      return value.slice(0, -2) + '.' + decimal;
+    } else if (value.length === 2) {
+      return `0.${value}`;
+    } else {
+      return `0.0${value}`;
+    }
   }
 
-  private registerOnChange(fn: any): void {
-    this.onChange = fn;
-  }
-
-  public registerOnTouched(fn: any): void {
-    this.onTouched = fn;
-  }
-
-  public updateValue(event: Event): void {
+  public onUpdateValue(event: Event): void {
     const input = event.target as HTMLInputElement;
-    input.value = this.resetNumber(input.value, '');
+    input.value = this.resetNumber(input.value);
 
     if(!this.validateNumbers(input.value)) {
-      input.value = this.value;
-      this.onChange(this.value);
-      this.onTouched();
+      input.value = this._value;
       return;
     }
-    this.value = input.value;
-    this.onChange(this.value);
-    this.onTouched();
+    this._value = input.value;
+    if(this._form !== null) {
+      this._form.controls[this._formControlName].setValue(this._value);
+    }
   }
 
   /**
@@ -72,7 +69,7 @@ export class InputNumberComponent implements OnInit {
    * @param value - El valor a formatear.
    * @returns - El valor formateado.
    */
-  private resetNumber(value: string, extension: string): string {
+  private resetNumber(value: string): string {
     if(value === null || value === undefined || value === '') {
       return '0.00';
     }
@@ -80,7 +77,7 @@ export class InputNumberComponent implements OnInit {
     if(decimal.length > 3) {
       return value.slice(0, value.indexOf('.') + 3);
     }
-    return value + extension;
+    return value;
   }
 
 
@@ -97,7 +94,7 @@ export class InputNumberComponent implements OnInit {
 
   public onBlur(event: Event): void {
     const input = event.target as HTMLInputElement;
-    input.value = this.resetNumber(input.value, '');
+    input.value = this.resetNumber(input.value);
 
     if(!input.value.includes('.')) {
       input.value = input.value !== '' ? input.value + '.00' : input.value;
@@ -116,9 +113,10 @@ export class InputNumberComponent implements OnInit {
       input.value = input.value + '00';
     }
 
-    this.value = input.value;
-    this.onChange(this.value);
-    this.onTouched();
+    this._value = input.value;
+    if(this._form !== null) {
+      this._form.controls[this._formControlName].setValue(this._value);
+    }
   }
 
 }

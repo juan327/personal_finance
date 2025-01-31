@@ -1,0 +1,249 @@
+.container {
+    display: flex;
+
+    input {
+        border-radius: 5px 0 0 5px;
+    }
+    
+    .input-icon {
+        padding: 0 10px;
+        cursor: pointer;
+        background-color: var(--color-black-border);
+        border: 1px solid var(--color-black-light);
+        border-radius: 0 5px 5px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+            background-color: #3F3F46;
+        }
+
+        &:active {
+            background-color: #52525B;
+        }
+    }
+
+    .content-calendar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.5);
+
+        .calendar {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--color-black);
+            border: 1px solid var(--color-black-light);
+            border-radius: 5px;
+            padding: 5px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            opacity: 1;
+            gap: 5px;
+            animation: show-calendar 0.3s ease;
+    
+            .header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 5px;
+    
+                .header-back, .header-next {
+                    cursor: pointer;
+                    color: var(--color-blue);
+                    transition: background-color 0.3s ease;
+                    padding: 5px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 150px;
+    
+                    &:hover {
+                        background-color: rgba(96, 165, 250, 0.1);
+                    }
+                }
+    
+                .header-title {
+                    display: flex;
+                    gap: 10px;
+                }
+                
+                span {
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    padding: 2px 7px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
+    
+                    &:hover {
+                        background-color: var(--color-black-light);
+                    }
+                }
+            }
+
+            hr {
+                margin: 0;
+                border: none;
+                background-color: var(--color-black-light);
+                height: 1px;
+            }
+
+            /* BODY DAYS */
+            .body-days {
+                display: flex;
+                gap: 5px;
+                flex-direction: column;
+    
+                .week, .days {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    gap: 5px;
+                }
+                span {
+                    text-align: center;
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    padding: 2px 7px;
+                    border-radius: 5px;
+                    color: var(--color-black-text);
+                    transition: background-color 0.3s ease;
+                }
+    
+                .days span {
+    
+                    &.actual-month {
+                        cursor: pointer;
+                        color: #fff;
+    
+                        &:hover {
+                            background-color: var(--color-black-light);
+                        }
+                    }
+    
+                    &.active {
+                        cursor: default;
+                        background-color: rgba(96, 165, 250, 0.5);
+    
+                        &:hover {
+                            background-color: rgba(96, 165, 250, 0.5);
+                        }
+                    }
+                }
+    
+            }
+            
+            /* BODY MONTHS */
+            .body-months {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 5px;
+
+                span {
+                    text-align: center;
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    padding: 2px 7px;
+                    border-radius: 5px;
+                    color: #fff;
+                    transition: background-color 0.3s ease;
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: var(--color-black-light);
+                    }
+                }
+            }
+
+            /* BODY YEARS */
+            .body-years {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 5px;
+
+                span {
+                    text-align: center;
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    padding: 2px 7px;
+                    border-radius: 5px;
+                    color: #fff;
+                    transition: background-color 0.3s ease;
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: var(--color-black-light);
+                    }
+                }
+            }
+    
+            .content-time {
+                display: grid;
+                grid-template-columns: repeat(5, auto);
+                align-items: center;
+                justify-content: center;
+                padding: 5px;
+                gap: 10px;
+    
+                .time-selector {
+                    display: flex;
+                    align-items: center;
+                    flex-direction: column;
+                    gap: 5px;
+    
+                    span {
+                        font-size: 1.1rem;
+                        font-weight: 700;
+                        padding: 2px 7px;
+                        border-radius: 5px;
+                        color: #fff;
+                        transition: background-color 0.3s ease;
+                    }
+                    i {
+                        color: var(--color-blue);
+                        cursor: pointer;
+                        transition: background-color 0.3s ease;
+                        padding: 5px;
+                        border-radius: 150px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+    
+                        &:hover {
+                            background-color: rgba(96, 165, 250, 0.1);
+                        }
+                    }
+                }
+            }
+
+            .footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+
+            }
+    
+        }
+    }
+}
+
+@keyframes show-calendar {
+    from {
+        margin-top: -100px;
+        opacity: 0;
+    }
+    to {
+        margin-top: 0;
+        opacity: 1;
+    }
+}

@@ -64,12 +64,13 @@
                 </div>
                 <div class="form-group">
                     <label for="amount">Cantidad</label>
-                    <partial-inputnumber formControlName="amount" autocomplete="off"></partial-inputnumber>
+                    <partial-inputnumber _id="amount" _formControlName="amount" _autocomplete="off" [_form]="this._form" />
                     <!-- <input type="number" formControlName="amount" id="amount" name="amount" required> -->
                 </div>
                 <div class="form-group">
                     <label for="date">Fecha</label>
-                    <input type="date" formControlName="date" id="date" name="date" autocomplete="off" required>
+                    <partial-inputdatetime _formControlName="date" _autocomplete="off" [_form]="this._form" />
+                    <!-- <input type="date" formControlName="date" id="date" name="date" autocomplete="off" required> -->
                 </div>
                 <div class="form-group">
                     <label for="category">Categoría</label>

@@ -132,8 +132,12 @@ export class GenericService {
      * @param format Formato de la fecha (default yyyy-MM-dd)
      * @returns string | null
      */
-    public transformDateToString(date: Date, format: string = 'yyyy-MM-dd'): string | null {
-        return this._datePipe.transform(date, format);
+    public transformDateToString(date: Date, format: string = 'yyyy-MM-dd'): string {
+        const response = this._datePipe.transform(date, format);
+        if(response === null) {
+            return '';
+        }
+        return response;
     }
 
     /**
