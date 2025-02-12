@@ -65,7 +65,10 @@ export class SelectComponent implements OnInit {
   }
 
   public onSearch(event: any): void {
-    if(event.target.value === undefined || event.target.value === null || event.target.value === '') return;
+    if(event.target.value === undefined || event.target.value === null || event.target.value === '') {
+      this._optionsView = this._options;
+      return;
+    }
     const text: string = event.target.value.toLowerCase().trim();
     this._optionsView = this._options.filter(item => item[this._label].toLowerCase().includes(text));
   }
