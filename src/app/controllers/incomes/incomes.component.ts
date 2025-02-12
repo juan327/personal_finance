@@ -18,11 +18,13 @@ import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTab
 import { IncomesService } from './incomes.service';
 import { DTOLocalStorage } from 'src/app/shared/dto/generic';
 import { InputDatetimeComponent } from 'src/app/shared/partials/inputdatetime/inputdatetime.component';
+import { SelectComponent } from 'src/app/shared/partials/select/select.component';
 Highcharts.setOptions(darkTheme); // Aplica el tema
 
 @Component({
   selector: 'app-incomes',
-  imports: [CommonModule, FormsModule, HighchartsChartModule, ReactiveFormsModule, ModalComponent, InputNumberComponent, TableComponent, ModalConfirmationComponent, InputDatetimeComponent],
+  imports: [CommonModule, FormsModule, HighchartsChartModule, ReactiveFormsModule, ModalComponent, InputNumberComponent,
+    TableComponent, ModalConfirmationComponent, InputDatetimeComponent, SelectComponent],
   templateUrl: './incomes.component.html',
   styleUrl: './incomes.component.css',
   standalone: true,
@@ -59,7 +61,6 @@ export class IncomesComponent implements OnInit {
   public _localStorage: DTOLocalStorage = {
     currency: this._genericService.getLocalStorage<string>('currency') || '$',
     language: this._genericService.getLocalStorage<string>('language') || 'es',
-    minutesOfDifferenceTimeZone: -300,
   };
   //#endregion
 

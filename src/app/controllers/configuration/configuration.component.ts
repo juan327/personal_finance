@@ -67,7 +67,6 @@ export class ConfigurationComponent implements OnInit {
   public _localStorage: DTOLocalStorage = {
     currency: this._genericService.getLocalStorage<string>('currency') || '$',
     language: this._genericService.getLocalStorage<string>('language') || 'es',
-    minutesOfDifferenceTimeZone: -300,
   };
 
   ngOnInit(): void {
@@ -85,7 +84,7 @@ export class ConfigurationComponent implements OnInit {
   }
 
   public async loadTable(): Promise<void> {
-    const response = await this._configurationService.loadTable(this._partialTableOptions, this._categories, this._localStorage);
+    const response = await this._configurationService.loadTable(this._partialTableOptions, this._categories);
     if (!response.confirmation) {
       return;
     }

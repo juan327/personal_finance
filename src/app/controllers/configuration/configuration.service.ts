@@ -31,7 +31,7 @@ export class ConfigurationService {
      * @param _categories Categorías cargadas
      * @returns Promise<DTOResponseWithData<DTOLoadTable>>
      */
-    public async loadTable(_partialTableOptions: DTOPartialTableOptions, _categories: CategoryEntity[], _localStorage: DTOLocalStorage): Promise<DTOResponseWithData<DTOLoadTable>> {
+    public async loadTable(_partialTableOptions: DTOPartialTableOptions, _categories: CategoryEntity[]): Promise<DTOResponseWithData<DTOLoadTable>> {
         var objReturn: DTOResponseWithData<DTOLoadTable> = new DTOResponseWithData<DTOLoadTable>();
         try {
             await this._indexeddbService.getAllItems<CategoryEntity>(EnumTableName.categories, 'created', 'desc').then(response => {
@@ -42,7 +42,7 @@ export class ConfigurationService {
                     categoryId: item.categoryId,
                     name: item.name,
                     type: item.type,
-                    created: this._genericService.addMinutesToDate(item.created, _localStorage.minutesOfDifferenceTimeZone),
+                    created: item.created,
                     isDefault: item.isDefault,
                   };
                   return objReturn;
@@ -145,7 +145,7 @@ export class ConfigurationService {
                 categoryId: this._genericService.generateGuid(),
                 name: model.name,
                 type: responseInt.data,
-                created: this._genericService.getDateTimeNowUtc(),
+                created: this._genericService.getDateTimeNow(),
                 isDefault: false,
               };
         

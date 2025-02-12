@@ -3,6 +3,7 @@ partial-table {
         width: 100%;
         display: grid;
         gap: 10px;
+        view-transition-name: partial-table;
 
         .body {
             overflow: auto;
@@ -46,6 +47,29 @@ partial-table {
                     }
                 }
             }
+
+            .partial-table-mobile {
+                display: none;
+                flex-direction: column;
+                gap: 10px;
+
+                ul {
+                    padding: 10px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+
+                    &:nth-child(odd) {
+                        background-color: var(--color-black-weight);
+                    }
+
+                    li {
+                        display: flex;
+                        gap: 10px;
+                    }
+                }
+            }
+
         }
 
     }

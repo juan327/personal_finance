@@ -1,6 +1,7 @@
 section {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
     gap: 20px;
 
     .card {
@@ -12,30 +13,68 @@ section {
         background-color: var(--color-black);
         border: 1px solid var(--color-black-border);
 
-        &:nth-child(5), &:nth-child(6) {
-            grid-column: span 2;
-        }
-
-        h3 {
-            font-size: 1.6rem;
-        }
-
-        span {
-            font-size: 1.2rem;
-
-            &.title {
-                font-size: 1.3rem;
-            }
-
-            &.comment {
-                font-size: 0.8rem;
-                color: var(--color-black-text);
+        partial-table {
+            h2 {
+                text-align: center;
             }
         }
+    }
 
-        .balance {
-            &.income { color: var(--color-green); }
-            &.expense { color: var(--color-red); }
+    .widgets {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+
+        .card {
+            h3 {
+                font-size: 1.6rem;
+            }
+    
+            span {
+                font-size: 1.2rem;
+    
+                &.title {
+                    font-size: 1.3rem;
+                }
+    
+                &.comment {
+                    font-size: 0.8rem;
+                    color: var(--color-black-text);
+                }
+            }
+    
+            .balance {
+                &.income { color: var(--color-green); }
+                &.expense { color: var(--color-red); }
+            }
+    
+        }
+    }
+
+    @container (width <= 700px) {
+        .widgets {
+            grid-template-columns: repeat(2, 1fr);
+            
+            .card {
+                &:last-child {
+                    grid-column: span 2;
+                }
+            }
+        }
+        .card {
+            padding: 10px !important;
+        }
+    }
+
+    @container (width <= 500px) {
+        .widgets {
+            grid-template-columns: 1fr;
+            
+            .card {
+                &:last-child {
+                    grid-column: initial;
+                }
+            }
         }
     }
 

@@ -91,7 +91,7 @@ export class ExpensesService {
                                     categoryId: item.categoryId,
                                     categoryName: item.category.name,
                                     categoryType: item.category.type,
-                                    created: this._genericService.addMinutesToDate(item.created, _localStorage.minutesOfDifferenceTimeZone),
+                                    created: item.created,
                                 };
                                 return objReturn;
                             });
@@ -145,20 +145,19 @@ export class ExpensesService {
                     opc: ['Edit'],
                     opcLabel: ['Editar'],
                     transactionId: [item.transactionId, [Validators.required]],
-                    name: [item.name, [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
+                    name: [item.name, [Validators.required, Validators.minLength(3)]],
                     amount: [item.amount.toString(), [Validators.required, DecimalValidator(2)]],
                     date: [item.date, [Validators.required]],
                     categoryId: [item.categoryId, [Validators.required]],
                     description: [item.description],
                 });
             } else {
-                const date = this._genericService.addMinutesToDate(this._genericService.getDateTimeNowUtc(), -300);
                 objReturn.data = this._fb.group({
                     opc: ['Create'],
                     opcLabel: ['Crear'],
-                    name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
+                    name: ['', [Validators.required, Validators.minLength(3)]],
                     amount: ['0', [Validators.required, DecimalValidator(2)]],
-                    date: [date, [Validators.required]],
+                    date: [this._genericService.getDateTimeNow(), [Validators.required]],
                     categoryId: [_categories[0].categoryId, [Validators.required]],
                     description: [''],
                 });
@@ -229,7 +228,7 @@ export class ExpensesService {
                     description: model.description,
                     categoryId: model.categoryId,
                     category: findCategory,
-                    created: this._genericService.getDateTimeNowUtc(),
+                    created: this._genericService.getDateTimeNow(),
                 };
 
                 await this._indexeddbService.addItem<TransactionEntity>(EnumTableName.transactions, newObj).then(response => {

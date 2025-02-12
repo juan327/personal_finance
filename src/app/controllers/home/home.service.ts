@@ -57,7 +57,7 @@ export class HomeService {
                             categoryId: item.categoryId,
                             categoryName: item.category.name,
                             categoryType: item.category.type,
-                            created: this._genericService.addMinutesToDate(item.created, _localStorage.minutesOfDifferenceTimeZone),
+                            created: item.created,
                         };
                         return objReturn;
                     });

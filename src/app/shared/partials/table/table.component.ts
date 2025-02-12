@@ -1,4 +1,4 @@
-import { Component, ContentChild, EventEmitter, inject, input, Input, OnChanges, OnInit, Output, SimpleChanges, TemplateRef } from '@angular/core';
+import { Component, ContentChild, effect, EventEmitter, inject, input, Input, OnChanges, OnInit, Output, signal, SimpleChanges, TemplateRef } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DTOPartialTableOptions } from './dto/dtoTable';
@@ -12,11 +12,11 @@ import { DTOPartialTableOptions } from './dto/dtoTable';
 })
 
 export class TableComponent implements OnInit, OnChanges {
-  constructor() { }
 
   @ContentChild('caption') templateCaption!: TemplateRef<any>;
   @ContentChild('header') templateHeader!: TemplateRef<any>;
   @ContentChild('body') templateBody!: TemplateRef<any>;
+  @ContentChild('bodyMobile') templateBodyMobile!: TemplateRef<any>;
   @ContentChild('footer') templateFooter!: TemplateRef<any>;
 
   @Output() public readonly eventOnChange = new EventEmitter<DTOPartialTableOptions>();
@@ -43,6 +43,20 @@ export class TableComponent implements OnInit, OnChanges {
   public _listPages: number[] = [];
   public _actualPage: number = 1;
   public _totalPages: number = 0;
+
+  private _signal_htmlView = signal<{
+    resume: string
+  }>({
+    resume: '',
+  });
+  public _htmlView = this._signal_htmlView();
+
+  constructor()
+  {
+    effect(() => {
+      this._htmlView = this._signal_htmlView();
+    });
+  }
 
   ngOnInit(): void {
   }
@@ -91,10 +105,12 @@ export class TableComponent implements OnInit, OnChanges {
         break;
       }
     }
+    this.updateResumeHtmlView();
   }
 
   public selectTake(event: any): void {
     this._options.take = parseInt(event.target.value);
+    this.updateResumeHtmlView();
     this.eventOnChange.emit(this._options);
   }
 
@@ -109,12 +125,22 @@ export class TableComponent implements OnInit, OnChanges {
     if(page <= 0 || page > this._totalPages) return;
     this._actualPage = page;
     this._options.skip = (page - 1) * this._options.take;
+    this.updateResumeHtmlView();
     this.eventOnChange.emit(this._options);
   }
 
   public search(event: any): void {
     this._options.search = event.target.value;
+    this.updateResumeHtmlView();
     this.eventOnChange.emit(this._options);
+  }
+
+  private updateResumeHtmlView() {
+    this._signal_htmlView.set({ resume: `Mostrando ${this._options.skip + 1} al ${this._options.skip + this._valuesView.length} de ${this._options.total} registros` });
+  }
+
+  public getKeysOfObject(obj: any): string[] {
+    return Object.keys(obj);
   }
 
 }

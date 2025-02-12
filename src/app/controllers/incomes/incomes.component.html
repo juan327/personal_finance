@@ -14,7 +14,7 @@
                     <th>Nombre</th>
                     <th>Monto</th>
                     <th>Fecha</th>
-                    <th>Descripción</th>
+                    <!-- <th>Descripción</th> -->
                     <th>Creación</th>
                     <th>OPC</th>
                 </tr>
@@ -27,7 +27,7 @@
                         {{this._localStorage.currency}} {{item.amountString}}
                     </td>
                     <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
-                    <td>{{item.description}}</td>
+                    <!-- <td>{{item.description}}</td> -->
                     <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
                     <td>
                         <div class="operations">
@@ -40,6 +40,27 @@
                         </div>
                     </td>
                 </tr>
+            </ng-template>
+            <ng-template #bodyMobile let-item>
+                <ul>
+                    <li><strong>Categoría:</strong> {{item.categoryName}}</li>
+                    <li><strong>Nombre:</strong> {{item.name}}</li>
+                    <li><strong>Monto:</strong> {{this._localStorage.currency}} {{item.amountString}}</li>
+                    <li><strong>Fecha:</strong> {{item.date | date: 'dd/MM/yyyy hh:mm a'}}</li>
+                    <!-- <li><strong>Descripción:</strong> {{item.description}}</li> -->
+                    <li><strong>Creación:</strong> {{item.created | date: 'dd/MM/yyyy hh:mm a'}}</li>
+                    <li>
+                        <strong>OPC:</strong>
+                        <div class="operations">
+                            <button type="button" class="btn primary" title="Editar" (click)="this.onOpenModal(item)">
+                                <i class="pi pi-pen-to-square"></i>
+                            </button>  
+                            <button type="button" class="btn danger" title="Eliminar" (click)="this.onModalOpenDelete(item)">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                        </div>
+                    </li>
+                </ul>
             </ng-template>
         </partial-table>
         TOTAL: {{this._totalAmountSignal()}}
@@ -74,11 +95,16 @@
                 </div>
                 <div class="form-group">
                     <label for="category">Categoría</label>
-                    <select formControlName="categoryId" id="category" name="category" required>
+                    <!-- <select formControlName="categoryId" id="category" name="category" required>
                         @for (item of this._categories; track $index) {
                         <option [value]="item.categoryId">{{item.name}}</option>
                         }
-                    </select>
+                    </select> -->
+                    <partial-select _formControlName="categoryId" [_options]="this._categories" [_form]="this._form" _label="name" _value="categoryId">
+                        <ng-template #body let-item>
+                            {{item.name}}
+                        </ng-template>
+                    </partial-select>
                 </div>
                 <div class="form-group">
                     <label for="description">Descripción</label>

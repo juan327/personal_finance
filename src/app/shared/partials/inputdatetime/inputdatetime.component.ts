@@ -262,9 +262,9 @@ export class InputDatetimeComponent implements OnInit {
   }
 
   public onSelectDatetimeNow(): void {
-    const datetime = this._genericService.addMinutesToDate(this._genericService.getDateTimeNowUtc(), -300);
+    const datetime = this._genericService.getDateTimeNow();
     this._selectedDay = {
-      code: this._genericService.transformDateToString(this._genericService.getDateTimeNowUtc(), 'yyyyMMdd'),
+      code: this._genericService.transformDateToString(this._genericService.getDateTimeNow(), 'yyyyMMdd'),
       datetime: datetime,
     };
     this._value = this._genericService.transformDateToString(this._selectedDay.datetime, this._formatDate);

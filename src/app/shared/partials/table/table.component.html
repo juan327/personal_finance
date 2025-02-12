@@ -19,6 +19,11 @@
                 }
             </tbody>
         </table>
+        <div class="partial-table-mobile">
+            @for (item of this._valuesView; track $index) {
+                <ng-container *ngTemplateOutlet="this.templateBodyMobile; context: { $implicit: item }"></ng-container>
+            }
+        </div>
     </div>
     <div class="footer">
         <ng-container *ngTemplateOutlet="Template_Pagination"></ng-container>
@@ -26,12 +31,14 @@
 </div>
 
 <ng-template #Template_Pagination>
-    <span class="resume">Mostrando {{this._options.skip + 1}} al {{this._options.skip + this._valuesView.length}} de {{this._options.total}} registros</span>
+    <span class="resume">
+        {{this._htmlView.resume}}
+    </span>
     <div class="pagination">
-        <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(1)">
+        <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(1)" title="Ir a la primera página">
             <i class="pi pi-angle-double-left"></i>
         </button>
-        <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(this._actualPage - 1)">
+        <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(this._actualPage - 1)" title="Ir a la página anterior">
             <i class="pi pi-angle-left"></i>
         </button>
 
@@ -39,15 +46,15 @@
             <button type="button" [class.active]="this._actualPage == item" (click)="this.changePage(item)">{{item}}</button>
         }
 
-        <button type="button" [disabled]="this._actualPage == this._totalPages" (click)="this.changePage(this._actualPage + 1)">
+        <button type="button" [disabled]="this._actualPage == this._totalPages" (click)="this.changePage(this._actualPage + 1)" title="Ir a la página siguiente">
             <i class="pi pi-angle-right"></i>
         </button>
-        <button type="button" [disabled]="this._actualPage == this._totalPages" (click)="this.changePage(this._totalPages)">
+        <button type="button" [disabled]="this._actualPage == this._totalPages" (click)="this.changePage(this._totalPages)" title="Ir a la última página">
             <i class="pi pi-angle-double-right"></i>
         </button>
     </div>
     <div class="selector">
-        <select (change)="this.selectTake($event)">
+        <select (change)="this.selectTake($event)" title="Seleccionar cantidad de registros a mostrar">
             @for (item of this._listTake; track item.value) {
                 <option [value]="item.value" [selected]="this._options.take == item.value">{{item.label}}</option>
             }
