@@ -82,14 +82,14 @@ export class ConfigurationService {
                 opc: ['Edit'],
                 opcLabel: ['Editar'],
                 categoryId: [item.categoryId, [Validators.required]],
-                name: [item.name, [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
+                name: [item.name, [Validators.required, Validators.maxLength(20)]],
                 type: [item.type, [Validators.required]],
               });
             } else {
               objReturn.data = this._fb.group({
                 opc: ['Create'],
                 opcLabel: ['Crear'],
-                name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
+                name: ['', [Validators.required, Validators.maxLength(20)]],
                 type: [1, [Validators.required]],
               });
             }

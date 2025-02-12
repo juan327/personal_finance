@@ -145,7 +145,7 @@ export class IncomesService {
                     opc: ['Edit'],
                     opcLabel: ['Editar'],
                     transactionId: [item.transactionId, [Validators.required]],
-                    name: [item.name, [Validators.required, Validators.minLength(3)]],
+                    name: [item.name, [Validators.required]],
                     amount: [item.amount.toString(), [Validators.required, DecimalValidator(2)]],
                     date: [item.date, [Validators.required]],
                     categoryId: [item.categoryId, [Validators.required]],
@@ -155,7 +155,7 @@ export class IncomesService {
                 objReturn.data = this._fb.group({
                     opc: ['Create'],
                     opcLabel: ['Crear'],
-                    name: ['', [Validators.required, Validators.minLength(3)]],
+                    name: ['', [Validators.required]],
                     amount: ['0', [Validators.required, DecimalValidator(2)]],
                     date: [this._genericService.getDateTimeNow(), [Validators.required]],
                     categoryId: [_categories[0].categoryId, [Validators.required]],
