@@ -65,7 +65,9 @@ export class SelectComponent implements OnInit {
   }
 
   public onSearch(event: any): void {
-    this._optionsView = this._options.filter(item => item[this._label].toLowerCase().includes(event.target.value.toLowerCase()));
+    if(event.target.value === undefined || event.target.value === null || event.target.value === '') return;
+    const text: string = event.target.value.toLowerCase().trim();
+    this._optionsView = this._options.filter(item => item[this._label].toLowerCase().includes(text));
   }
 
   private clearOption(): void {
