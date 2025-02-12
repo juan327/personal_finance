@@ -48,7 +48,7 @@
                 </tr>
             </ng-template>
             <ng-template #bodyMobile let-item>
-                <ul>
+                <ul [class]="item.categoryType === 1 ? 'income' : 'expense'">
                     <li><strong>Categoría:</strong> {{item.categoryName}}</li>
                     <li><strong>Nombre:</strong> {{item.name}}</li>
                     <li><strong>Monto:</strong> {{this._localStorage.currency}} {{item.categoryType === 1 ? '' : '-'}}{{this._genericService.convertToCurrencyFormat(item.amount).data}}</li>

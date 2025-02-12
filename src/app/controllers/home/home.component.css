@@ -80,7 +80,7 @@ section {
 
 }
 
-tr {
+tr, ul {
     &.income {
         background-color: rgba(134, 239, 172, 0.2) !important;
         &:nth-child(odd) {
