@@ -52,9 +52,9 @@ La aplicación estará disponible en http://localhost:4200
 
 ## 🌐 Demo
 
-**Este proyecto es solo para fines educativos y no debe ser utilizado para fines comerciales.**
-**No ingresar ningún dato financiero real en este proyecto, esto es solo una demostración y no tiene ningun tipo de protección de datos.**
-**Se recomienda solo ingresar datos no reales o de prueba**
+- **Este proyecto es solo para fines educativos y no debe ser utilizado para fines comerciales.**
+- **No ingresar ningún dato financiero real en este proyecto, esto es solo una demostración y no tiene ningun tipo de protección de datos.**
+- **Se recomienda solo ingresar datos no reales o de prueba.**
 
 https://juan327.github.io/personal_finance
 
