@@ -58,6 +58,26 @@
                     </td>
                 </tr>
             </ng-template>
+            <ng-template #bodyMobile let-item>
+                <ul>
+                    <li><strong>Tipo:</strong> {{item.type === 1 ? 'Ingreso' : 'Gasto'}}</li>
+                    <li><strong>Nombre:</strong> {{item.name}}</li>
+                    <li><strong>Creación:</strong> {{item.created | date: 'dd/MM/yyyy hh:mm a'}}</li>
+                    <li>
+                        @if(!item.isDefault) {
+                            <strong>OPC:</strong>
+                            <div class="operations">
+                                <button type="button" class="btn primary" title="Editar" (click)="this.onOpenModal(item)">
+                                    <i class="pi pi-pen-to-square"></i>
+                                </button>  
+                                <button type="button" class="btn danger" title="Eliminar" (click)="this.onModalOpenDelete(item)">
+                                    <i class="pi pi-trash"></i>
+                                </button>
+                            </div>
+                        }
+                    </li>
+                </ul>
+            </ng-template>
         </partial-table>
 
     </div>
