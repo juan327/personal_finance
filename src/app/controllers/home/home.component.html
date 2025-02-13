@@ -23,7 +23,7 @@
         <div id="container"></div>
     </div>
     <div class="card">
-        <partial-table [_values]="this._transactions" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">
+        <partial-table [_values]="this._transactions" [_options]="this._partialTableOptions" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">
             <ng-template #caption>
                 <h2>Ultimos movimientos</h2>
             </ng-template>
