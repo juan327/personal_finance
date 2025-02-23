@@ -26,10 +26,6 @@ export class HighchartService {
      */
     public updateChart(chart: Chart | null, options: Highcharts.Options): void {
         if(chart === null) return;
-        chart.showLoading();
-        setTimeout(() => {
-            chart.update(options);
-            chart.hideLoading();
-        }, 10);
+        chart.update(options);
     }
 }

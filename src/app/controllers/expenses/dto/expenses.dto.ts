@@ -14,3 +14,43 @@ export interface DTOLoadTable {
 export interface DTOModalOpen {
     form: FormGroup | null;
 }
+
+export interface DTODictionary {
+    cardTable: {
+        title: string;
+        button: string;
+        search: string;
+        header: {
+            category: string;
+            name: string;
+            amount: string;
+            date: string;
+            created: string;
+        };
+        opc: {
+            edit: string;
+            delete: string;
+        };
+    };
+    cardChart: {
+        title: string;
+        percentage: string
+        noData: string;
+    };
+    modalCreate: {
+        title: string;
+        name: string;
+        amount: string;
+        date: string;
+        category: string;
+        description: string;
+        opc: {
+            create: string;
+            edit: string;
+        }
+    };
+    modalDelete: {
+        title: string;
+        body: string;
+    }
+}

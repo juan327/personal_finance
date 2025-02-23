@@ -3,6 +3,7 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GenericService } from '../../services/generic.service';
+import { DTODictionary } from './dto/select';
 
 @Component({
   selector: 'partial-select',
@@ -15,6 +16,8 @@ import { GenericService } from '../../services/generic.service';
 export class SelectComponent implements OnInit {
   constructor() { }
   private readonly _genericService = inject(GenericService);
+  private readonly _localStorage = this._genericService.getDataLocalStorage();
+  public _dictionary: DTODictionary | null = null;
 
   @ContentChild('body') templateBody!: TemplateRef<any>;
 
@@ -29,14 +32,16 @@ export class SelectComponent implements OnInit {
   public _option: any | null = null;
   public _showOptions: boolean = false;
 
-  ngOnInit(): void {
-    if(this._options.length <= 0) return;
+  async ngOnInit(): Promise<void> {
+    await this.loadDictionary();
     
-    if(this._form !== null) {
+    if (this._options.length <= 0) return;
+
+    if (this._form !== null) {
       const value: any = this._form.controls[this._formControlName].value;
-      if(value !== null && value !== undefined) {
+      if (value !== null && value !== undefined) {
         const findOption = this._options.find(item => item[this._value] === value);
-        if(findOption !== null && findOption !== undefined) {
+        if (findOption !== null && findOption !== undefined) {
           this._option = findOption;
         }
       }
@@ -51,12 +56,25 @@ export class SelectComponent implements OnInit {
 
   }
 
+  private async loadDictionary(): Promise<void> {
+    try {
+      var response = await this._genericService.getDictionary<DTODictionary>(`shared/partials/select/${this._localStorage.language}.json`);
+      if (!response.confirmation) {
+        return;
+      }
+      this._dictionary = response.data;
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+  }
+
   private loadOptions(): void {
     this._optionsView = this._options;
   }
 
   public onShowOptions(event: MouseEvent, buttonClearOption: HTMLElement): void {
-    if(event.target === buttonClearOption) {
+    if (event.target === buttonClearOption) {
       this.clearOption();
       return;
     }
@@ -65,7 +83,7 @@ export class SelectComponent implements OnInit {
   }
 
   public onSearch(event: any): void {
-    if(event.target.value === undefined || event.target.value === null || event.target.value === '') {
+    if (event.target.value === undefined || event.target.value === null || event.target.value === '') {
       this._optionsView = this._options;
       return;
     }
@@ -76,7 +94,7 @@ export class SelectComponent implements OnInit {
   private clearOption(): void {
     this._option = null;
     this._showOptions = false;
-    if(this._form !== null) {
+    if (this._form !== null) {
       this._form.controls[this._formControlName].setValue(null);
     }
   }
@@ -85,13 +103,13 @@ export class SelectComponent implements OnInit {
     this._option = item;
     this._showOptions = false;
 
-    if(this._form !== null) {
+    if (this._form !== null) {
       this._form.controls[this._formControlName].setValue(item[this._value]);
     }
   }
 
   public onClickOutsideOptions(event: MouseEvent, contentOptions: HTMLDivElement): void {
-    if(contentOptions === event.target) {
+    if (contentOptions === event.target) {
       this._showOptions = false;
     }
   }

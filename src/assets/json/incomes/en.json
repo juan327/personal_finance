@@ -1,0 +1,39 @@
+{
+    "cardTable": {
+        "title": "Incomes",
+        "button": "Add income",
+        "search": "Quick search...",
+        "header": {
+            "category": "Category",
+            "name": "Name",
+            "amount": "Amount",
+            "date": "Date",
+            "created": "Created"
+        },
+        "opc": {
+            "edit": "Edit",
+            "delete": "Delete"
+        }
+    },
+    "cardChart": {
+        "title": "Income distribution",
+        "percentage": "Percentage",
+        "noData": "No data"
+    },
+    "modalCreate": {
+        "title": "Income",
+        "name": "Name",
+        "amount": "Amount",
+        "date": "Date",
+        "category": "Category",
+        "description": "Description",
+        "opc": {
+            "create": "Create",
+            "edit": "Edit"
+        }
+    },
+    "modalDelete": {
+        "title": "Delete income",
+        "body": "Are you sure you want to delete the income"
+    }
+}

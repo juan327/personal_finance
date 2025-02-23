@@ -1,0 +1,13 @@
+
+{
+    "header": {
+        "firstPage": "First page",
+        "previousPage": "Previous page",
+        "nextPage": "Next page",
+        "lastPage": "Last page",
+        "selector": {
+            "title": "Select the number of records to show",
+            "takeAll": "All"
+        }
+    }
+}

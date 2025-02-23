@@ -1,0 +1,9 @@
+{
+    "title": "Personal Finances",
+    "menu": {
+        "home": "Summary",
+        "incomes": "Incomes",
+        "expenses": "Expenses",
+        "configuration": "Configuration"
+    }
+}

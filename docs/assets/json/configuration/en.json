@@ -1,0 +1,42 @@
+{
+    "cardTitle": "Settings",
+    "cardCombo": {
+        "currency": "Currency",
+        "language": {
+            "label": "Language",
+            "spanish": "Spanish",
+            "english": "English"
+        }
+    },
+    "cardTable": {
+        "title": "Categories",
+        "button": "Add category",
+        "search": "Quick search...",
+        "header": {
+            "type": "Type",
+            "name": "Name",
+            "created": "Created"
+        },
+        "opc": {
+            "edit": "Edit",
+            "delete": "Delete"
+        }
+    },
+    "modalCreate": {
+        "title": "Category",
+        "name": "Name",
+        "type": {
+            "label": "Type",
+            "income": "Income",
+            "expense": "Expense"
+        },
+        "opc": {
+            "create": "Create",
+            "edit": "Edit"
+        }
+    },
+    "modalDelete": {
+        "title": "Delete category",
+        "body": "Are you sure you want to delete the category"
+    }
+}

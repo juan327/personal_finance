@@ -10,7 +10,7 @@ import { Chart } from 'highcharts';
 import { HighchartService } from 'src/app/shared/services/highchart.service';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { CategoryEntity } from 'src/app/shared/entities/category';
-import { DTOLoadTable, DTOModalOpen } from './dto/incomes.dto';
+import { DTODictionary, DTOLoadTable, DTOModalOpen } from './dto/incomes.dto';
 import { DTOLocalStorage, DTOResponse, DTOResponseWithData } from 'src/app/shared/dto/generic';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DecimalValidator } from 'src/app/shared/validators/decimal.validator';
@@ -22,7 +22,6 @@ import { EnumTableName } from 'src/app/shared/enums/generic.enum';
 })
 
 export class IncomesService {
-    constructor() { }
 
     //#region injectables
     private readonly _indexeddbService = inject(IndexeddbService);
@@ -33,7 +32,34 @@ export class IncomesService {
 
     //#region private properties
     private readonly _categoryType: number = 1;
+    private readonly _localStorage: DTOLocalStorage = this._genericService.getDataLocalStorage();
+    private _dictionary: DTODictionary | null = null;
     //#endregion
+
+    constructor()
+    {
+    }
+
+    public async initialize(): Promise<void> {
+        await this.loadDictionary();
+    }
+
+    private async loadDictionary(): Promise<void> {
+        try {
+            var response = await this._genericService.getDictionary<DTODictionary>(`incomes/${this._localStorage.language}.json`);
+            if (!response.confirmation) {
+                return;
+            }
+            this._dictionary = response.data;
+        }
+        catch (error: any) {
+            console.error(error);
+        }
+    }
+
+    public getLocalStorage(): DTOLocalStorage {
+        return this._localStorage;
+    }
 
     /**
      * Carga todas las categorías
@@ -45,7 +71,7 @@ export class IncomesService {
             await this._indexeddbService.getAllItems<CategoryEntity>(EnumTableName.categories, 'name', 'desc').then(response => {
                 objReturn.data = response.items.filter(c => c.type === this._categoryType);
                 objReturn.confirmation = true;
-                objReturn.message = 'Categorías cargadas correctamente';
+                objReturn.message = this._localStorage.language === 'es' ? 'Categorías cargadas correctamente' : 'Categories loaded successfully';
             }, error => {
                 console.error(error);
                 objReturn.message = error.message;
@@ -65,19 +91,18 @@ export class IncomesService {
      * @param _partialTableOptions Opciones del partial table
      * @param _transactions Transacciones cargadas
      * @param _categories Categorías cargadas
-     * @param _localStorage LocalStorage cargado
      * @param _chart Gráfico cargado
      * @returns Promise<DTOResponseWithData<DTOLoadTable>>
      */
-    public async loadTable(_partialTableOptions: DTOPartialTableOptions, _transactions: DTOTransaction[], _categories: CategoryEntity[],
-        _localStorage: DTOLocalStorage, _chart: Chart | null): Promise<DTOResponseWithData<DTOLoadTable>> {
+    public async loadTable(model: {_partialTableOptions: DTOPartialTableOptions, _transactions: DTOTransaction[], _categories: CategoryEntity[],
+        _chart: Chart | null}): Promise<DTOResponseWithData<DTOLoadTable>> {
 
         var objReturn: DTOResponseWithData<DTOLoadTable> = new DTOResponseWithData<DTOLoadTable>();
         try {
             await this._indexeddbService.getAllItems<TransactionEntity>(EnumTableName.transactions, 'created', 'desc').then(response => {
                 if (response.total > 0) {
-                    const search = _partialTableOptions.search.trim().toLowerCase();
-                    _transactions = response.items.filter(c => c.category.type === this._categoryType
+                    const search = model._partialTableOptions.search.trim().toLowerCase();
+                    model._transactions = response.items.filter(c => c.category.type === this._categoryType
                         && (c.name.toLowerCase().includes(search)
                             || c.description.toLowerCase().includes(search)
                             || c.category.name.toLowerCase().includes(search))).map((item: TransactionEntity) => {
@@ -95,28 +120,28 @@ export class IncomesService {
                                 };
                                 return objReturn;
                             });
-                    _partialTableOptions.total = _transactions.length;
+                    model._partialTableOptions.total = model._transactions.length;
                 }
 
-                const responseChartOptions = this.getChartOptions(_transactions, _categories, _localStorage);
+                const responseChartOptions = this.getChartOptions(model._transactions, model._categories);
                 if (!responseChartOptions.confirmation) {
                     objReturn.message = responseChartOptions.message;
                     objReturn.exception = responseChartOptions.exception;
                 } else {
-                    if (_transactions.length > 1 && _chart !== null) {
-                        this._highchartService.updateChart(_chart, responseChartOptions.data);
+                    if (model._transactions.length > 1 && model._chart !== null) {
+                        this._highchartService.updateChart(model._chart, responseChartOptions.data);
                     } else {
-                        _chart = this._highchartService.buildChart('container', responseChartOptions.data);
+                        model._chart = this._highchartService.buildChart('chart', responseChartOptions.data);
                     }
                 }
                 objReturn.data = {
-                    partialTableOptions: _partialTableOptions,
-                    transactions: _transactions,
-                    categories: _categories,
-                    chart: _chart,
+                    partialTableOptions: model._partialTableOptions,
+                    transactions: model._transactions,
+                    categories: model._categories,
+                    chart: model._chart,
                 };
                 objReturn.confirmation = true;
-                objReturn.message = 'Tabla cargada correctamente';
+                objReturn.message = this._localStorage.language === 'es' ? 'Tabla cargada correctamente' : 'Table loaded successfully';
             }, error => {
                 console.error(error);
                 objReturn.message = error.message;
@@ -143,7 +168,7 @@ export class IncomesService {
             if (item !== null) {
                 objReturn.data = this._fb.group({
                     opc: ['Edit'],
-                    opcLabel: ['Editar'],
+                    opcLabel: [this._dictionary?.modalCreate.opc.edit],
                     transactionId: [item.transactionId, [Validators.required]],
                     name: [item.name, [Validators.required]],
                     amount: [item.amount.toString(), [Validators.required, DecimalValidator(2)]],
@@ -154,7 +179,7 @@ export class IncomesService {
             } else {
                 objReturn.data = this._fb.group({
                     opc: ['Create'],
-                    opcLabel: ['Crear'],
+                    opcLabel: [this._dictionary?.modalCreate.opc.create],
                     name: ['', [Validators.required]],
                     amount: ['0', [Validators.required, DecimalValidator(2)]],
                     date: [this._genericService.getDateTimeNow(), [Validators.required]],
@@ -164,7 +189,7 @@ export class IncomesService {
             }
 
             objReturn.confirmation = true;
-            objReturn.message = 'Modal abierto correctamente';
+            objReturn.message = this._localStorage.language === 'es' ? 'Modal abierto correctamente' : 'Modal opened successfully';
         }
         catch (error: any) {
             console.error(error);
@@ -193,7 +218,7 @@ export class IncomesService {
             }
             const findCategory = _categories.find((item) => item.categoryId === model.categoryId && item.type === this._categoryType);
             if (findCategory === undefined) {
-                objReturn.message = 'No se encontró la categoría';
+                objReturn.message = this._localStorage.language === 'es' ? 'No se encontró la categoría' : 'Category not found';
                 return objReturn;
             }
 
@@ -208,7 +233,7 @@ export class IncomesService {
 
                     await this._indexeddbService.updateItem<TransactionEntity>(EnumTableName.transactions, response.transactionId, response).then(response => {
                         objReturn.confirmation = true;
-                        objReturn.message = 'Transacción actualizada correctamente';
+                        objReturn.message = this._localStorage.language === 'es' ? 'Transacción actualizada correctamente' : 'Transaction updated successfully';
                     }, error => {
                         console.error(error);
                         objReturn.message = error.message;
@@ -233,7 +258,7 @@ export class IncomesService {
 
                 await this._indexeddbService.addItem<TransactionEntity>(EnumTableName.transactions, newObj).then(response => {
                     objReturn.confirmation = true;
-                    objReturn.message = 'Transacción creada correctamente';
+                    objReturn.message = this._localStorage.language === 'es' ? 'Transacción creada correctamente' : 'Transaction created successfully';
                 }, error => {
                     console.error(error);
                     objReturn.message = error.message;
@@ -259,7 +284,7 @@ export class IncomesService {
         try {
             await this._indexeddbService.deleteItem(EnumTableName.transactions, transactionId).then(response => {
                 objReturn.confirmation = true;
-                objReturn.message = 'Transacción eliminada correctamente';
+                objReturn.message = this._localStorage.language === 'es' ? 'Transacción eliminada correctamente' : 'Transaction deleted successfully';
             }, error => {
                 console.error(error);
                 objReturn.message = error.message;
@@ -278,10 +303,9 @@ export class IncomesService {
      * Devuelve las opciones del gráfico
      * @param _transactions Transacciones cargadas
      * @param _categories Categorías cargadas
-     * @param _localStorage LocalStorage cargado
      * @returns DTOResponseWithData<Highcharts.Options>
      */
-    private getChartOptions(_transactions: DTOTransaction[], _categories: CategoryEntity[], _localStorage: any): DTOResponseWithData<Highcharts.Options> {
+    private getChartOptions(_transactions: DTOTransaction[], _categories: CategoryEntity[]): DTOResponseWithData<Highcharts.Options> {
         var objReturn: DTOResponseWithData<Highcharts.Options> = new DTOResponseWithData<Highcharts.Options>();
         try {
             const data: {
@@ -292,6 +316,7 @@ export class IncomesService {
                 sliced: boolean;
             }[] = [];
             const total = _transactions.reduce((a, b) => a + b.amount, 0);
+            const responseTotal = this._genericService.convertToCurrencyFormat(total);
 
             for (let i = 0; i < _categories.length; i++) {
                 const item = _categories[i];
@@ -302,7 +327,7 @@ export class IncomesService {
 
                 data.push({
                     id: item.categoryId,
-                    name: `${item.name} (${_localStorage.currency} ${amountString})`,
+                    name: `${item.name} (${this._localStorage.currency} ${amountString})`,
                     y: porcentString,
                     selected: false,
                     sliced: false,
@@ -316,10 +341,10 @@ export class IncomesService {
 
             objReturn.data = {
                 title: {
-                    text: 'Distribución de ingresos',
+                    text: `${this._dictionary?.cardChart.title} (${this._localStorage.currency} ${responseTotal.data})`,
                 },
                 subtitle: {
-                    text: _transactions.length > 0 ? '' : 'Sin datos',
+                    text: _transactions.length > 0 ? '' : this._dictionary?.cardChart.noData,
                 },
                 tooltip: {
                     valueSuffix: '%',
@@ -327,14 +352,14 @@ export class IncomesService {
                 series: _transactions.length > 0 ? [
                     {
                         type: 'pie',
-                        name: 'Porcentaje',
+                        name: this._dictionary?.cardChart.percentage,
                         showInLegend: true,
                         data: data,
                     }
                 ] : [],
             };
             objReturn.confirmation = true;
-            objReturn.message = 'Opciones del gráfico cargadas correctamente';
+            objReturn.message = this._localStorage.language === 'es' ? 'Opciones del gráfico cargadas correctamente' : 'Chart options loaded successfully';
         }
         catch (error: any) {
             console.error(error);
@@ -342,6 +367,10 @@ export class IncomesService {
             objReturn.exception = error.toString();
         }
         return objReturn;
+    }
+
+    public getDictionary(): DTODictionary | null {
+        return this._dictionary;
     }
 
 }

@@ -10,7 +10,7 @@ import { Chart } from 'highcharts';
 import { HighchartService } from 'src/app/shared/services/highchart.service';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { CategoryEntity } from 'src/app/shared/entities/category';
-import { DTOLoadTable, DTOResults } from './dto/home.dto';
+import { DTODictionary, DTOLoadTable, DTOLoadYears, DTOResults } from './dto/home.dto';
 import { DTOHighchartSeries, DTOLocalStorage, DTOResponseWithData } from 'src/app/shared/dto/generic';
 import { EnumTableName } from 'src/app/shared/enums/generic.enum';
 //#endregion
@@ -27,6 +27,31 @@ export class HomeService {
     private readonly _highchartService = inject(HighchartService);
     private readonly _genericService = inject(GenericService);
     //#endregion
+
+    public async loadYears(): Promise<DTOResponseWithData<number[]>> {
+        var objReturn: DTOResponseWithData<number[]> = new DTOResponseWithData<number[]>();
+        try {
+            await this._indexeddbService.getAllItems<TransactionEntity>(EnumTableName.transactions, 'created', 'desc').then(response => {
+                objReturn.confirmation = true;
+                if (response.total > 0) {
+                    objReturn.data = [...new Set(response.items.map(c => c.date.getFullYear()))].sort((a, b) => b - a);
+                } else {
+                    objReturn.data = [new Date().getFullYear()];
+                }
+                objReturn.message = 'Años cargados correctamente';
+            }, error => {
+                console.error(error);
+                objReturn.message = error.message;
+                objReturn.exception = error.toString();
+            });
+        }
+        catch (error: any) {
+            console.error(error);
+            objReturn.message = error.message;
+            objReturn.exception = error.toString();
+        }
+        return objReturn;
+    }
     
     /**
      * Carga las transacciones para la tabla
@@ -37,21 +62,21 @@ export class HomeService {
      * @param _chart Gráfico cargado
      * @returns Promise<DTOResponseWithData<DTOLoadTable>>
      */
-    public async loadTable(_partialTableOptions: DTOPartialTableOptions, _transactions: DTOTransaction[], _categories: CategoryEntity[],
-        _localStorage: DTOLocalStorage, _chart: Chart | null): Promise<DTOResponseWithData<DTOLoadTable>> {
+    public async loadTable(model: {_partialTableOptions: DTOPartialTableOptions, _transactions: DTOTransaction[], _categories: CategoryEntity[],
+        _localStorage: DTOLocalStorage, _chart: Chart | null, _selectedYear: number, _dictionary: DTODictionary}): Promise<DTOResponseWithData<DTOLoadTable>> {
         
         var objReturn: DTOResponseWithData<DTOLoadTable> = new DTOResponseWithData<DTOLoadTable>();
         try
         {
             await this._indexeddbService.getAllItems<TransactionEntity>(EnumTableName.transactions, 'created', 'desc').then(response => {
                 if (response.total > 0) {
-                    _partialTableOptions.total = response.total;
-                    _transactions = response.items.map((item: TransactionEntity) => {
+                    model._partialTableOptions.total = response.total;
+                    model._transactions = response.items.map((item: TransactionEntity) => {
                         const objReturn: DTOTransaction = {
                             transactionId: item.transactionId,
                             name: item.name,
                             amount: item.amount,
-                            amountString: `${_localStorage.currency} ${this._genericService.convertToCurrencyFormat(item.amount).data}`,
+                            amountString: `${model._localStorage.currency} ${this._genericService.convertToCurrencyFormat(item.amount).data}`,
                             date: item.date,
                             description: item.description,
                             categoryId: item.categoryId,
@@ -63,23 +88,23 @@ export class HomeService {
                     });
                 }
     
-                const responseChartOptions = this.getChartOptions(_transactions, _localStorage);
+                const responseChartOptions = this.getChartOptions(model._transactions, model._localStorage, model._selectedYear, model._dictionary);
                 if (!responseChartOptions.confirmation) {
                     objReturn.message = responseChartOptions.message;
                     objReturn.exception = responseChartOptions.exception;
                 } else {
-                    if (_transactions.length > 1 && _chart !== null) {
-                        this._highchartService.updateChart(_chart, responseChartOptions.data);
+                    if (model._transactions.length > 1 && model._chart !== null) {
+                        this._highchartService.updateChart(model._chart, responseChartOptions.data);
                     } else {
-                        _chart = this._highchartService.buildChart('container', responseChartOptions.data);
+                        model._chart = this._highchartService.buildChart('chart', responseChartOptions.data);
                     }
                 }
                 
                 objReturn.data = {
-                    partialTableOptions: _partialTableOptions,
-                    transactions: _transactions,
-                    categories: _categories,
-                    chart: _chart,
+                    partialTableOptions: model._partialTableOptions,
+                    transactions: model._transactions,
+                    categories: model._categories,
+                    chart: model._chart,
                 };
                 objReturn.confirmation = true;
                 objReturn.message = 'Tabla cargada correctamente';
@@ -154,7 +179,7 @@ export class HomeService {
      * @param _localStorage LocalStorage cargado
      * @returns DTOResponseWithData<Highcharts.Options>
      */
-    private getChartOptions(_transactions: DTOTransaction[], _localStorage: any): DTOResponseWithData<Highcharts.Options> {
+    private getChartOptions(_transactions: DTOTransaction[], _localStorage: any, _selectedYear: number, _dictionary: DTODictionary): DTOResponseWithData<Highcharts.Options> {
         var objReturn: DTOResponseWithData<Highcharts.Options> = new DTOResponseWithData<Highcharts.Options>();
         try {
             const dataIncomes: {
@@ -166,7 +191,7 @@ export class HomeService {
                 y: number;
             }[] = [];
 
-            const categories = this._genericService.getMonthsFromYear(2025);
+            const categories = this._genericService.getMonthsFromYear(_selectedYear);
 
             for (let i = 0; i < categories.length; i++) {
                 const item = categories[i];
@@ -195,12 +220,12 @@ export class HomeService {
 
             const series: DTOHighchartSeries<any>[] = [
                 {
-                    name: 'Ingresos',
+                    name: _dictionary.cardChart.incomes,
                     data: dataIncomes,
                     color: 'var(--color-green)',
                 },
                 {
-                    name: 'Gastos',
+                    name: _dictionary.cardChart.expenses,
                     data: dataExpenses,
                     color: 'var(--color-red)',
                 }
@@ -211,7 +236,7 @@ export class HomeService {
                     type: 'column'
                 },
                 title: {
-                    text: 'Rendimiento del año'
+                    text: _dictionary.cardChart.title
                 },
                 xAxis: {
                     categories: categories.map(c => c.name),
@@ -223,7 +248,7 @@ export class HomeService {
                 yAxis: {
                     min: 0,
                     title: {
-                        text: 'AÑO 2025'
+                        text: `${_dictionary.cardChart.leftText} ${_selectedYear}`
                     }
                 },
                 plotOptions: {
@@ -242,6 +267,19 @@ export class HomeService {
         }
         catch (error: any)
         {
+            console.error(error);
+            objReturn.message = error.message;
+            objReturn.exception = error.toString();
+        }
+        return objReturn;
+    }
+
+    public async getDictionary(_localStorage: DTOLocalStorage): Promise<DTOResponseWithData<DTODictionary>> {
+        var objReturn: DTOResponseWithData<DTODictionary> = new DTOResponseWithData<DTODictionary>();
+        try {
+            objReturn = await this._genericService.getDictionary<DTODictionary>(`home/${_localStorage.language}.json`);
+        }
+        catch (error: any) {
             console.error(error);
             objReturn.message = error.message;
             objReturn.exception = error.toString();

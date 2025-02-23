@@ -1,0 +1,20 @@
+{
+    "cardTotal": "Total balance",
+    "cardTotalIncomes": "Total incomes",
+    "cardTotalExpenses": "Total expenses",
+    "cardYear": "Select year",
+    "cardChart": {
+        "title": "Yearly performance",
+        "leftText": "YEAR",
+        "incomes": "Incomes",
+        "expenses": "Expenses"
+    },
+    "cardTitleTable": "Latest transactions",
+    "cardHeaderTable": {
+        "category": "Category",
+        "name": "Name",
+        "amount": "Amount",
+        "date": "Date",
+        "created": "Created"
+    }
+}

@@ -18,6 +18,23 @@ section {
                 text-align: center;
             }
         }
+
+        .year {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .form-group {
+                display: flex;
+                gap: 5px;
+                align-items: center;
+                justify-content: center;
+
+                label {
+                    white-space: nowrap;
+                }
+            }
+        }
     }
 
     .widgets {

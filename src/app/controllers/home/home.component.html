@@ -1,61 +1,74 @@
-<section>
-    <div class="widgets">
-        <div class="card total">
-            <span class="title">Balance total</span>
-            <h3 class="balance" [class]="this._results.totalInt >= 0 ? 'income' : 'expense'">
-                {{this._localStorage.currency}} {{this._results.total}}
-            </h3>
+@if(this._dictionary !== null) {
+    <section>
+        <div class="widgets">
+            <div class="card total">
+                <span class="title">{{this._dictionary.cardTotal}}</span>
+                <h3 class="balance" [class]="this._results.totalInt >= 0 ? 'income' : 'expense'">
+                    {{this._localStorage.currency}} {{this._results.total}}
+                </h3>
+            </div>
+            <div class="card total-incomes">
+                <span class="title">{{this._dictionary.cardTotalIncomes}}</span>
+                <h3 class="balance income">
+                    {{this._localStorage.currency}} {{this._results.totalIncomes}}
+                </h3>
+            </div>
+            <div class="card total-expenses">
+                <span class="title">{{this._dictionary.cardTotalExpenses}}</span>
+                <h3 class="balance expense">
+                    {{this._localStorage.currency}} {{this._results.totalExpenses}}
+                </h3>
+            </div>
         </div>
-        <div class="card total-incomes">
-            <span class="title">Ingresos totales</span>
-            <h3 class="balance income">
-                {{this._localStorage.currency}} {{this._results.totalIncomes}}
-            </h3>
+        <div class="card">
+            <div class="year">
+                <div class="form-group">
+                    <label for="year">{{this._dictionary.cardYear}}</label>
+                    <select name="year" id="year" [(ngModel)]="this._selectedYear" (change)="this.changeYear($event)">
+                        @for (item of this._listYears; track $index) {
+                            <option [value]="item">{{item}}</option> 
+                        }
+                    </select>
+                </div>
+            </div>
+            <hr>
+            <div id="chart"></div>
         </div>
-        <div class="card total-expenses">
-            <span class="title">Gastos totales</span>
-            <h3 class="balance expense">
-                {{this._localStorage.currency}} {{this._results.totalExpenses}}
-            </h3>
+        <div class="card">
+            <partial-table [_values]="this._transactions" [_options]="this._partialTableOptions" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">
+                <ng-template #caption>
+                    <h2>{{this._dictionary.cardTitleTable}}</h2>
+                </ng-template>
+                <ng-template #header>
+                    <tr>
+                        <th>{{this._dictionary.cardHeaderTable.category}}</th>
+                        <th>{{this._dictionary.cardHeaderTable.name}}</th>
+                        <th>{{this._dictionary.cardHeaderTable.amount}}</th>
+                        <th>{{this._dictionary.cardHeaderTable.date}}</th>
+                        <th>{{this._dictionary.cardHeaderTable.created}}</th>
+                    </tr>
+                </ng-template>
+                <ng-template #body let-item>
+                    <tr [class]="item.categoryType === 1 ? 'income' : 'expense'">
+                        <td>{{item.categoryName}}</td>
+                        <td>{{item.name}}</td>
+                        <td>
+                            {{this._localStorage.currency}} {{item.categoryType === 1 ? '' : '-'}}{{this._genericService.convertToCurrencyFormat(item.amount).data}}
+                        </td>
+                        <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                        <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                    </tr>
+                </ng-template>
+                <ng-template #bodyMobile let-item>
+                    <ul [class]="item.categoryType === 1 ? 'income' : 'expense'">
+                        <li><strong>{{this._dictionary.cardHeaderTable.category}}:</strong> {{item.categoryName}}</li>
+                        <li><strong>{{this._dictionary.cardHeaderTable.name}}:</strong> {{item.name}}</li>
+                        <li><strong>{{this._dictionary.cardHeaderTable.amount}}:</strong> {{this._localStorage.currency}} {{item.categoryType === 1 ? '' : '-'}}{{this._genericService.convertToCurrencyFormat(item.amount).data}}</li>
+                        <li><strong>{{this._dictionary.cardHeaderTable.date}}:</strong> {{item.date | date: 'dd/MM/yyyy hh:mm a'}}</li>
+                        <li><strong>{{this._dictionary.cardHeaderTable.created}}:</strong> {{item.created | date: 'dd/MM/yyyy hh:mm a'}}</li>
+                    </ul>
+                </ng-template>
+            </partial-table>
         </div>
-    </div>
-    <div class="card">
-        <div id="container"></div>
-    </div>
-    <div class="card">
-        <partial-table [_values]="this._transactions" [_options]="this._partialTableOptions" (eventOnLoad)="this.loadPartialTable($event)" (eventOnChange)="this.changePartialTable($event)">
-            <ng-template #caption>
-                <h2>Ultimos movimientos</h2>
-            </ng-template>
-            <ng-template #header>
-                <tr>
-                    <th>Categoría</th>
-                    <th>Nombre</th>
-                    <th>Monto</th>
-                    <th>Fecha</th>
-                    <th>Creación</th>
-                </tr>
-            </ng-template>
-            <ng-template #body let-item>
-                <tr [class]="item.categoryType === 1 ? 'income' : 'expense'">
-                    <td>{{item.categoryName}}</td>
-                    <td>{{item.name}}</td>
-                    <td>
-                        {{this._localStorage.currency}} {{item.categoryType === 1 ? '' : '-'}}{{this._genericService.convertToCurrencyFormat(item.amount).data}}
-                    </td>
-                    <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
-                    <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
-                </tr>
-            </ng-template>
-            <ng-template #bodyMobile let-item>
-                <ul [class]="item.categoryType === 1 ? 'income' : 'expense'">
-                    <li><strong>Categoría:</strong> {{item.categoryName}}</li>
-                    <li><strong>Nombre:</strong> {{item.name}}</li>
-                    <li><strong>Monto:</strong> {{this._localStorage.currency}} {{item.categoryType === 1 ? '' : '-'}}{{this._genericService.convertToCurrencyFormat(item.amount).data}}</li>
-                    <li><strong>Fecha:</strong> {{item.date | date: 'dd/MM/yyyy hh:mm a'}}</li>
-                    <li><strong>Creación:</strong> {{item.created | date: 'dd/MM/yyyy hh:mm a'}}</li>
-                </ul>
-            </ng-template>
-        </partial-table>
-    </div>
-</section>
+    </section>
+}

@@ -1,31 +1,33 @@
-<div class="select" (click)="this.onShowOptions($event, buttonClearOption)">
-    @if(this._option !== null) {
-        <span class="active">{{this._option[this._label]}}</span>
-    }
-    @else {
-        <span>Selecciona una categoria</span>
-    }
-    <div class="icons">
-        <i class="clear pi pi-times" #buttonClearOption [class.hide]="this._option === null"></i>
-        <i class="pi pi-angle-down"></i>
-    </div>
-</div>
-
-@if(this._showOptions) {
-    <div class="content-options" #contentOptions (click)="this.onClickOutsideOptions($event, contentOptions)">
-        <div class="options">
-            <div class="options-search">
-                <input type="text" placeholder="Busqueda rapida..." autocomplete="off" (input)="this.onSearch($event)">
-                <i class="pi pi-search"></i>
-            </div>
-    
-            <div class="options-list">
-                @for (item of this._optionsView; track $index) {
-                    <div class="options-list-item" (click)="this.onSelect(item)" [class.active]="this._option?.[this._value] === item[this._value]">
-                        <ng-container *ngTemplateOutlet="this.templateBody; context: { $implicit: item }"></ng-container>
-                    </div>
-                }
-            </div>
+@if(this._dictionary !== null) {
+    <div class="select" (click)="this.onShowOptions($event, buttonClearOption)">
+        @if(this._option !== null) {
+            <span class="active">{{this._option[this._label]}}</span>
+        }
+        @else {
+            <span>{{this._dictionary.selectPlaceholder}}</span>
+        }
+        <div class="icons">
+            <i class="clear pi pi-times" #buttonClearOption [class.hide]="this._option === null"></i>
+            <i class="pi pi-angle-down"></i>
         </div>
     </div>
+    
+    @if(this._showOptions) {
+        <div class="content-options" #contentOptions (click)="this.onClickOutsideOptions($event, contentOptions)">
+            <div class="options">
+                <div class="options-search">
+                    <input type="text" [placeholder]="this._dictionary.selectSearch" autocomplete="off" (input)="this.onSearch($event)">
+                    <i class="pi pi-search"></i>
+                </div>
+        
+                <div class="options-list">
+                    @for (item of this._optionsView; track $index) {
+                        <div class="options-list-item" (click)="this.onSelect(item)" [class.active]="this._option?.[this._value] === item[this._value]">
+                            <ng-container *ngTemplateOutlet="this.templateBody; context: { $implicit: item }"></ng-container>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
 }

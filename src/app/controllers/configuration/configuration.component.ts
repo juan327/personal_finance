@@ -11,6 +11,7 @@ import { ModalConfirmationComponent } from 'src/app/shared/partials/modalconfirm
 import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTable';
 import { ConfigurationService } from './configuration.service';
 import { DTOLocalStorage } from 'src/app/shared/dto/generic';
+import { DTODictionary } from './dto/configuration.dto';
 
 @Component({
   selector: 'app-configuration',
@@ -27,6 +28,9 @@ export class ConfigurationComponent implements OnInit {
   public readonly _genericService = inject(GenericService);
   private readonly _configurationService = inject(ConfigurationService);
 
+  public _localStorage: DTOLocalStorage = this._genericService.getDataLocalStorage();
+  public _dictionary: DTODictionary | null = null;
+  
   public _categories: CategoryEntity[] = [];
   public _selectedCategory: CategoryEntity | null = null;
 
@@ -41,9 +45,7 @@ export class ConfigurationComponent implements OnInit {
   public _languages: {
     value: string;
     label: string;
-  }[] = [
-      { value: 'en', label: 'English' }, { value: 'es', label: 'Español' }
-    ];
+  }[] = [];
   public _partialTableOptions: DTOPartialTableOptions = {
     search: '',
     skip: 0,
@@ -59,19 +61,13 @@ export class ConfigurationComponent implements OnInit {
   public _categoryTypes: {
     value: number;
     label: string;
-  }[] = [
-      { value: 1, label: 'Ingreso' },
-      { value: 2, label: 'Gasto' },
-    ];
+  }[] = [];
 
-  public _localStorage: DTOLocalStorage = {
-    currency: this._genericService.getLocalStorage<string>('currency') || '$',
-    language: this._genericService.getLocalStorage<string>('language') || 'es',
-  };
-
-  ngOnInit(): void {
-    this._selectedCurrency = this._genericService.getLocalStorage<string>('currency') || '$';
-    this.loadTable();
+  async ngOnInit(): Promise<void> {
+    await this.loadDictionary();
+    this._selectedCurrency = this._localStorage.currency;
+    this._selectedLanguage = this._localStorage.language;
+    await this.loadTable();
   }
 
   ngAfterViewInit(): void {
@@ -81,6 +77,22 @@ export class ConfigurationComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
+  }
+
+  private async loadDictionary(): Promise<void> {
+    const response = await this._configurationService.getDictionary(this._localStorage);
+    if (!response.confirmation) {
+      return;
+    }
+    this._dictionary = response.data;
+    this._languages  = [
+        { value: 'en', label: this._dictionary.cardCombo.language.english },
+        { value: 'es', label: this._dictionary.cardCombo.language.spanish },
+      ];
+    this._categoryTypes = [
+          { value: 1, label: this._dictionary.modalCreate.type.income },
+          { value: 2, label: this._dictionary.modalCreate.type.expense },
+        ]
   }
 
   public async loadTable(): Promise<void> {
@@ -94,7 +106,8 @@ export class ConfigurationComponent implements OnInit {
   }
 
   public onOpenModal(item: CategoryEntity | null = null): void {
-    var response = this._configurationService.modalOpen(this._categories, item);
+    if(this._dictionary === null) return;
+    var response = this._configurationService.modalOpen(this._dictionary, this._categories, item);
     if (!response.confirmation) {
       alert(response.message);
       return;
@@ -151,6 +164,11 @@ export class ConfigurationComponent implements OnInit {
 
   public onChangeCurrency(event: any): void {
     this._genericService.setLocalStorage('currency', event.target.value);
+  }
+
+  public onChangeLanguage(event: any): void {
+    this._genericService.setLocalStorage('language', event.target.value);
+    window.location.reload();
   }
 
 }

@@ -1,63 +1,62 @@
-<div class="container">
-    <div class="caption">
-        <ng-container *ngTemplateOutlet="this.templateCaption"></ng-container>
-    </div>
-    <!-- <div class="filter">
-        <input type="text" placeholder="Busqueda rapida..." (input)="this.search($event)">
-    </div> -->
-    <div class="header">
-        <ng-container *ngTemplateOutlet="Template_Pagination"></ng-container>
-    </div>
-    <div class="body">
-        <table class="partial-table">
-            <thead>
-                <ng-container *ngTemplateOutlet="this.templateHeader"></ng-container>
-            </thead>
-            <tbody>
+@if(this._dictionary !== null) {
+    <div class="container">
+        <div class="caption">
+            <ng-container *ngTemplateOutlet="this.templateCaption"></ng-container>
+        </div>
+        <div class="header">
+            <ng-container *ngTemplateOutlet="Template_Pagination"></ng-container>
+        </div>
+        <div class="body">
+            <table class="partial-table">
+                <thead>
+                    <ng-container *ngTemplateOutlet="this.templateHeader"></ng-container>
+                </thead>
+                <tbody>
+                    @for (item of this._valuesView; track $index) {
+                        <ng-container *ngTemplateOutlet="this.templateBody; context: { $implicit: item }"></ng-container>
+                    }
+                </tbody>
+            </table>
+            <div class="partial-table-mobile">
                 @for (item of this._valuesView; track $index) {
-                    <ng-container *ngTemplateOutlet="this.templateBody; context: { $implicit: item }"></ng-container>
+                    <ng-container *ngTemplateOutlet="this.templateBodyMobile; context: { $implicit: item }"></ng-container>
                 }
-            </tbody>
-        </table>
-        <div class="partial-table-mobile">
-            @for (item of this._valuesView; track $index) {
-                <ng-container *ngTemplateOutlet="this.templateBodyMobile; context: { $implicit: item }"></ng-container>
-            }
+            </div>
+        </div>
+        <div class="footer">
+            <ng-container *ngTemplateOutlet="Template_Pagination"></ng-container>
         </div>
     </div>
-    <div class="footer">
-        <ng-container *ngTemplateOutlet="Template_Pagination"></ng-container>
-    </div>
-</div>
-
-<ng-template #Template_Pagination>
-    <span class="resume">
-        {{this._htmlView.resume}}
-    </span>
-    <div class="pagination">
-        <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(1)" title="Ir a la primera página">
-            <i class="pi pi-angle-double-left"></i>
-        </button>
-        <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(this._actualPage - 1)" title="Ir a la página anterior">
-            <i class="pi pi-angle-left"></i>
-        </button>
-
-        @for (item of this._listPages; track $index) {
-            <button type="button" [class.active]="this._actualPage == item" (click)="this.changePage(item)">{{item}}</button>
-        }
-
-        <button type="button" [disabled]="this._actualPage == this._totalPages" (click)="this.changePage(this._actualPage + 1)" title="Ir a la página siguiente">
-            <i class="pi pi-angle-right"></i>
-        </button>
-        <button type="button" [disabled]="this._actualPage == this._totalPages" (click)="this.changePage(this._totalPages)" title="Ir a la última página">
-            <i class="pi pi-angle-double-right"></i>
-        </button>
-    </div>
-    <div class="selector">
-        <select (change)="this.selectTake($event)" title="Seleccionar cantidad de registros a mostrar">
-            @for (item of this._listTake; track item.value) {
-                <option [value]="item.value" [selected]="this._options.take == item.value">{{item.label}}</option>
+    
+    <ng-template #Template_Pagination>
+        <span class="resume">
+            {{this._signal_htmlView()}}
+        </span>
+        <div class="pagination">
+            <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(1)" [title]="this._dictionary.header.firstPage">
+                <i class="pi pi-angle-double-left"></i>
+            </button>
+            <button type="button" [disabled]="this._actualPage == 1" (click)="this.changePage(this._actualPage - 1)" [title]="this._dictionary.header.previousPage">
+                <i class="pi pi-angle-left"></i>
+            </button>
+    
+            @for (item of this._listPages; track $index) {
+                <button type="button" [class.active]="this._actualPage == item" (click)="this.changePage(item)">{{item}}</button>
             }
-        </select>
-    </div>
-</ng-template>
+    
+            <button type="button" [disabled]="this._actualPage == this._totalPages" (click)="this.changePage(this._actualPage + 1)" [title]="this._dictionary.header.nextPage">
+                <i class="pi pi-angle-right"></i>
+            </button>
+            <button type="button" [disabled]="this._actualPage == this._totalPages" (click)="this.changePage(this._totalPages)" [title]="this._dictionary.header.lastPage">
+                <i class="pi pi-angle-double-right"></i>
+            </button>
+        </div>
+        <div class="selector">
+            <select (change)="this.selectTake($event)" [title]="this._dictionary.header.selector.title">
+                @for (item of this._listTake; track item.value) {
+                    <option [value]="item.value" [selected]="this._options.take == item.value">{{item.label}}</option>
+                }
+            </select>
+        </div>
+    </ng-template>
+}

@@ -13,13 +13,14 @@ import { darkTheme } from 'src/app/shared/themes/highcharts/highcharts.dark.them
 import { DTOHighchartSeries, DTOLocalStorage } from 'src/app/shared/dto/generic';
 import { TableComponent } from 'src/app/shared/partials/table/table.component';
 import { DTOPartialTableOptions } from 'src/app/shared/partials/table/dto/dtoTable';
-import { DTOResults } from './dto/home.dto';
+import { DTODictionary, DTOResults } from './dto/home.dto';
 import { HomeService } from './home.service';
+import { FormsModule } from '@angular/forms';
 Highcharts.setOptions(darkTheme); // Aplica el tema
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, HighchartsChartModule, TableComponent],
+  imports: [CommonModule, HighchartsChartModule, TableComponent, FormsModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   standalone: true,
@@ -35,30 +36,21 @@ export class HomeComponent implements OnInit {
 
   public _transactions: DTOTransaction[] = [];
   public _categories: CategoryEntity[] = [];
-  public _results: DTOResults = {
-      incomes: [],
-      expenses: [],
-      totalIncomes: '0',
-      totalExpenses: '0',
-      total: '0',
-      totalInt: 0,
-    };
-  public _partialTableOptions: DTOPartialTableOptions = {
-    search: '',
-    skip: 0,
-    take: 5,
-    total: 0,
-  };
+  public _results: DTOResults = new DTOResults();
+  public _partialTableOptions: DTOPartialTableOptions = new DTOPartialTableOptions();
 
   public _chart: Chart | null = null;
 
-  public _localStorage: DTOLocalStorage = {
-    currency: this._genericService.getLocalStorage<string>('currency') || '$',
-    language: this._genericService.getLocalStorage<string>('language') || 'es',
-  };
+  public _localStorage: DTOLocalStorage = this._genericService.getDataLocalStorage();
+  public _dictionary: DTODictionary | null = null;
 
-  ngOnInit(): void {
-    this.loadTable();
+  public _listYears: number[] = [];
+  public _selectedYear: number = 0;
+
+  async ngOnInit(): Promise<void> {
+    await this.loadDictionary();
+    await this.loadYears();
+    await this.loadTable();
   }
 
   ngAfterViewInit(): void {
@@ -68,8 +60,36 @@ export class HomeComponent implements OnInit {
 
   }
 
+  private async loadDictionary(): Promise<void> {
+    const response = await this._homeService.getDictionary(this._localStorage);
+    if (!response.confirmation) {
+      return;
+    }
+    this._dictionary = response.data;
+  }
+
+  private async loadYears(): Promise<void> {
+    const response = await this._homeService.loadYears();
+    if (!response.confirmation) {
+      return;
+    }
+    if(response.data.length <= 0) return;
+    this._listYears = response.data;
+    this._selectedYear = this._listYears[0];
+  }
+
   public async loadTable(): Promise<void> {
-    const response = await this._homeService.loadTable(this._partialTableOptions, this._transactions, this._categories, this._localStorage, this._chart);
+    if(this._dictionary === null) return;
+    const response = await this._homeService.loadTable(
+      {
+        _partialTableOptions: this._partialTableOptions,
+        _transactions: this._transactions,
+        _categories: this._categories, 
+        _localStorage: this._localStorage, 
+        _chart: this._chart, 
+        _selectedYear: this._selectedYear,
+        _dictionary: this._dictionary
+      });
     if (!response.confirmation) {
       return;
     }
@@ -97,6 +117,11 @@ export class HomeComponent implements OnInit {
 
   public changePartialTable(item: DTOPartialTableOptions): void {
     this._partialTableOptions = item;
+    this.loadTable();
+  }
+
+  public changeYear(event: any): void {
+    this._selectedYear = parseInt(event.target.value);
     this.loadTable();
   }
 

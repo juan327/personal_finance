@@ -1,6 +1,8 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
-import { DTOResponseWithData } from '../dto/generic';
+import { DTOLocalStorage, DTOResponseWithData } from '../dto/generic';
+import { HttpClient } from '@angular/common/http';
+import { catchError, first, firstValueFrom, map, of } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -11,7 +13,8 @@ export class GenericService {
 
     private readonly _datePipe = inject(DatePipe);
     private readonly _decimalPipe = inject(DecimalPipe);
-    
+    private readonly _httpClient = inject(HttpClient);
+
     /**
      * Setea el valor de un LocalStorage
      * @param key Llave del LocalStorage
@@ -57,7 +60,7 @@ export class GenericService {
      */
     public getLanguage(): string {
         const language = this.getLocalStorage<string>('language');
-        if(language === null) {
+        if (language === null) {
             return 'en';
         }
         return language;
@@ -134,7 +137,7 @@ export class GenericService {
      */
     public transformDateToString(date: Date, format: string = 'yyyy-MM-dd'): string {
         const response = this._datePipe.transform(date, format);
-        if(response === null) {
+        if (response === null) {
             return '';
         }
         return response;
@@ -177,7 +180,7 @@ export class GenericService {
             }
             objReturn.data = convertNumber;
             objReturn.confirmation = true;
-            objReturn.message = 'Conversión exitosa';
+            objReturn.message = 'Convertion successful';
         }
         catch (ex: any) {
             objReturn.message = ex.message;
@@ -198,9 +201,9 @@ export class GenericService {
             let monto = value.toString().padStart(3, '0');  // Asegura que tenga al menos 3 caracteres
             const enteros = monto.slice(0, monto.length - 2);  // Toma los enteros (todo excepto los últimos 2 dígitos)
             const decimales = monto.slice(-2);  // Toma los últimos 2 dígitos como decimales
-    
+
             const responseParseNumber = this.parseNumber(`${enteros}.${decimales}`);
-            if(!responseParseNumber.confirmation) {
+            if (!responseParseNumber.confirmation) {
                 objReturn.message = responseParseNumber.message;
                 objReturn.exception = responseParseNumber.exception;
                 return objReturn;
@@ -208,7 +211,7 @@ export class GenericService {
 
             objReturn.data = this.transformNumberToCurrencyFormat(responseParseNumber.data);
             objReturn.confirmation = true;
-            objReturn.message = 'Conversión exitosa';
+            objReturn.message = 'Convertion successful';
         }
         catch (ex: any) {
             objReturn.message = ex.message;
@@ -229,9 +232,9 @@ export class GenericService {
             let monto = value.toString().padStart(3, '0');  // Asegura que tenga al menos 3 caracteres
             const enteros = monto.slice(0, monto.length - 2);  // Toma los enteros (todo excepto los últimos 2 dígitos)
             const decimales = monto.slice(-2);  // Toma los últimos 2 dígitos como decimales
-    
+
             const responseParseNumber = this.parseNumber(`${enteros}.${decimales}`);
-            if(!responseParseNumber.confirmation) {
+            if (!responseParseNumber.confirmation) {
                 objReturn.message = responseParseNumber.message;
                 objReturn.exception = responseParseNumber.exception;
                 return objReturn;
@@ -239,7 +242,7 @@ export class GenericService {
 
             objReturn.data = responseParseNumber.data;
             objReturn.confirmation = true;
-            objReturn.message = 'Conversión exitosa';
+            objReturn.message = 'Convertion successful';
         }
         catch (ex: any) {
             objReturn.message = ex.message;
@@ -263,21 +266,21 @@ export class GenericService {
      * @returns Un arreglo de objetos con name, dateStart y dateEnd
      */
     getMonthsFromYear(year: number): { name: string, dateStart: Date, dateEnd: Date }[] {
-      const months = [
-        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-      ];
-  
-      return months.map((monthName, index) => {
-        const startDate = new Date(year, index, 1);
-        const endDate = new Date(year, index + 1, 0); // Último día del mes actual
-  
-        return {
-          name: monthName,
-          dateStart: startDate,
-          dateEnd: endDate
-        };
-      });
+        const months = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+
+        return months.map((monthName, index) => {
+            const startDate = new Date(year, index, 1);
+            const endDate = new Date(year, index + 1, 0); // Último día del mes actual
+
+            return {
+                name: monthName,
+                dateStart: startDate,
+                dateEnd: endDate
+            };
+        });
     }
 
     /**
@@ -290,6 +293,41 @@ export class GenericService {
         const nuevaFecha = new Date(date); // Crear una copia de la fecha original
         nuevaFecha.setMinutes(nuevaFecha.getMinutes() + minutes);
         return nuevaFecha;
+    }
+
+    public getDataLocalStorage(): DTOLocalStorage {
+        return {
+            currency: this.getLocalStorage<string>('currency') || '$',
+            language: this.getLocalStorage<string>('language') || 'en',
+        };
+    }
+
+    public async getDictionary<T>(url: string): Promise<DTOResponseWithData<T>> {
+        var objReturn: DTOResponseWithData<T> = new DTOResponseWithData<T>();
+        try
+        {
+            await firstValueFrom(this._httpClient.get<T>(`assets/json/${url}`).pipe(first(),
+                map(response => {
+                    objReturn = {
+                        data: response,
+                        confirmation: true,
+                        message: 'Dictionary loaded successfully',
+                        exception: '',
+                    };
+                }),
+                catchError(error => {
+                    objReturn.message = error.message;
+                    objReturn.exception = error.toString();
+                    return of();
+                })
+            ));
+        }
+        catch (error: any) {
+            console.error(error);
+            objReturn.message = error.message;
+            objReturn.exception = error.toString();
+        }
+        return objReturn;
     }
 
 }

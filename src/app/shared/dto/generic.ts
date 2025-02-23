@@ -31,7 +31,11 @@ export interface DTOResponseListPagination<T> {
     total: number;
 }
 
-export interface DTOLocalStorage {
+export class DTOLocalStorage {
     currency: string;
     language: string;
+    constructor() {
+        this.currency = '$';
+        this.language = 'en';
+    }
 }

@@ -1,0 +1,39 @@
+{
+    "cardTable": {
+        "title": "Ingresos",
+        "button": "Agregar ingreso",
+        "search": "Busqueda rapida...",
+        "header": {
+            "category": "Categoría",
+            "name": "Nombre",
+            "amount": "Monto",
+            "date": "Fecha",
+            "created": "Creación"
+        },
+        "opc": {
+            "edit": "Editar",
+            "delete": "Eliminar"
+        }
+    },
+    "cardChart": {
+        "title": "Distribución de ingresos",
+        "percentage": "Porcentaje",
+        "noData": "Sin datos"
+    },
+    "modalCreate": {
+        "title": "ingreso",
+        "name": "Nombre",
+        "amount": "Cantidad",
+        "date": "Fecha",
+        "category": "Categoría",
+        "description": "Descripción",
+        "opc": {
+            "create": "Crear",
+            "edit": "Editar"
+        }
+    },
+    "modalDelete": {
+        "title": "Eliminar ingreso",
+        "body": "¿Está seguro de que desea eliminar el ingreso"
+    }
+}

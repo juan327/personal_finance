@@ -1,0 +1,42 @@
+{
+    "cardTitle": "Configuración",
+    "cardCombo": {
+        "currency": "Divisa",
+        "language": {
+            "label": "Idioma",
+            "spanish": "Español",
+            "english": "Inglés"
+        }
+    },
+    "cardTable": {
+        "title": "Categorias",
+        "button": "Agregar categoria",
+        "search": "Busqueda rapida...",
+        "header": {
+            "type": "Tipo",
+            "name": "Nombre",
+            "created": "Creación"
+        },
+        "opc": {
+            "edit": "Editar",
+            "delete": "Eliminar"
+        }
+    },
+    "modalCreate": {
+        "title": "categoría",
+        "name": "Nombre",
+        "type": {
+            "label": "Tipo",
+            "income": "Ingreso",
+            "expense": "Gasto"
+        },
+        "opc": {
+            "create": "Crear",
+            "edit": "Editar"
+        }
+    },
+    "modalDelete": {
+        "title": "Eliminar categoría",
+        "body": "¿Está seguro de que desea eliminar la categoría"
+    }
+}

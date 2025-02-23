@@ -1,15 +1,17 @@
-<nav>
-    <h1>Finanzas personales</h1>
-
-    <div>
-        <ul class="menu">
-            @for (item of this._menu; track $index) {
-                <li [class.active]="item.path === this._selectedMenu.path">
-                    <a [routerLink]="item.path">
-                        <i [class]="item.icon"></i> {{item.label}}
-                    </a>
-                </li>
-            }
-        </ul>
-    </div>
-</nav>
+@if(this._dictionary !== null) {
+    <nav>
+        <h1>{{this._dictionary.title}}</h1>
+    
+        <div>
+            <ul class="menu">
+                @for (item of this._menu; track $index) {
+                    <li [class.active]="item.path === this._selectedMenu.path">
+                        <a [routerLink]="item.path">
+                            <i [class]="item.icon"></i> {{item.label}}
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </nav>
+}

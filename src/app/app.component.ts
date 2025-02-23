@@ -6,10 +6,11 @@ import { CategoryEntity } from './shared/entities/category';
 import { GenericService } from './shared/services/generic.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { EnumTableName } from './shared/enums/generic.enum';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, LayoutComponent],
+  imports: [RouterOutlet, LayoutComponent,],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   standalone: true,
@@ -17,7 +18,6 @@ import { EnumTableName } from './shared/enums/generic.enum';
 })
 
 export class AppComponent implements OnInit {
-  title = 'personal_finance';
   private readonly _indexeddbService = inject(IndexeddbService);
   private readonly _genericService = inject(GenericService);
 
@@ -35,14 +35,14 @@ export class AppComponent implements OnInit {
       if(response.total <= 0) {
         this._indexeddbService.addItem<CategoryEntity>(EnumTableName.categories, {
           categoryId: this._genericService.generateGuid(),
-          name: 'Otros',
+          name: 'Others',
           type: 1,
           created: new Date(),
           isDefault: true,
         });
         this._indexeddbService.addItem<CategoryEntity>(EnumTableName.categories, {
           categoryId: this._genericService.generateGuid(),
-          name: 'Otros',
+          name: 'Others',
           type: 2,
           created: new Date(),
           isDefault: true,

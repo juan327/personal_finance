@@ -1,0 +1,20 @@
+{
+    "cardTotal": "Balance total",
+    "cardTotalIncomes": "Ingresos totales",
+    "cardTotalExpenses": "Gastos totales",
+    "cardYear": "Seleccionar el año",
+    "cardChart": {
+        "title": "Rendimiento del año",
+        "leftText": "AÑO",
+        "incomes": "Ingresos",
+        "expenses": "Gastos"
+    },
+    "cardTitleTable": "Ultimos movimientos",
+    "cardHeaderTable": {
+        "category": "Categoría",
+        "name": "Nombre",
+        "amount": "Monto",
+        "date": "Fecha",
+        "created": "Creación"
+    }
+}

@@ -14,7 +14,7 @@
         <hr>
         <div class="footer">
             <button type="button" class="btn danger" (click)="this.onCancel()">NO</button>
-            <button type="button" class="btn success" (click)="this.onSuccess()">SI</button>
+            <button type="button" class="btn success" (click)="this.onSuccess()">{{this._localStorage.language === 'es' ? 'SÍ' : 'YES'}}</button>
         </div>
     </div>
 </div>

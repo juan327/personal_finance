@@ -19,6 +19,7 @@ import { IncomesService } from './incomes.service';
 import { DTOLocalStorage } from 'src/app/shared/dto/generic';
 import { InputDatetimeComponent } from 'src/app/shared/partials/inputdatetime/inputdatetime.component';
 import { SelectComponent } from 'src/app/shared/partials/select/select.component';
+import { DTODictionary } from './dto/incomes.dto';
 Highcharts.setOptions(darkTheme); // Aplica el tema
 
 @Component({
@@ -38,6 +39,9 @@ export class IncomesComponent implements OnInit {
   public readonly _genericService = inject(GenericService);
   public readonly _incomesService = inject(IncomesService);
   //#endregion
+  
+  public _localStorage: DTOLocalStorage = this._genericService.getDataLocalStorage();
+  public _dictionary: DTODictionary | null = null;
 
   //#region variables
   public _form: FormGroup | null = null;
@@ -51,25 +55,14 @@ export class IncomesComponent implements OnInit {
     deleteTransaction: false,
   };
 
-  public _partialTableOptions: DTOPartialTableOptions = {
-    search: '',
-    skip: 0,
-    take: 5,
-    total: 0,
-  };
-
-  public _localStorage: DTOLocalStorage = {
-    currency: this._genericService.getLocalStorage<string>('currency') || '$',
-    language: this._genericService.getLocalStorage<string>('language') || 'es',
-  };
+  public _partialTableOptions: DTOPartialTableOptions = new DTOPartialTableOptions();
   //#endregion
 
-  //#region signals
-  public _totalAmountSignal: WritableSignal<string> = signal<string>('-');
-  //#endregion
 
-  ngOnInit(): void {
-    this.loadCategories();
+  async ngOnInit(): Promise<void> {
+    await this._incomesService.initialize();
+    this._dictionary = this._incomesService.getDictionary();
+    await this.loadCategories();
   }
 
   ngAfterViewInit(): void {
@@ -88,7 +81,12 @@ export class IncomesComponent implements OnInit {
   }
 
   public async loadTable(): Promise<void> {
-    const response = await this._incomesService.loadTable(this._partialTableOptions, this._transactions, this._categories, this._localStorage, this._chart);
+    const response = await this._incomesService.loadTable({
+      _partialTableOptions: this._partialTableOptions,
+      _transactions: this._transactions,
+      _categories: this._categories,
+      _chart: this._chart,
+    });
     if (!response.confirmation) {
       return;
     }
@@ -97,10 +95,10 @@ export class IncomesComponent implements OnInit {
     this._transactions = response.data.transactions;
     this._categories = response.data.categories;
     this._chart = response.data.chart;
-    this.loadTotalAmount();
   }
 
   public onOpenModal(item: DTOTransaction | null = null): void {
+    if(this._dictionary === null) return;
     var response = this._incomesService.modalOpen(this._categories, item);
     if (!response.confirmation) {
       alert(response.message);
@@ -140,15 +138,6 @@ export class IncomesComponent implements OnInit {
     }
     this._modals.deleteTransaction = false;
     this.loadTable();
-  }
-
-  public loadTotalAmount(): void {
-    const response = this._genericService.convertToCurrencyFormat(this._transactions.reduce((a, b) => a + b.amount, 0));
-    if (!response.confirmation) {
-      return;
-    }
-
-    this._totalAmountSignal.set(`${this._localStorage.currency} ${response.data}`);
   }
 
   public onLoadPartialTable(item: DTOPartialTableOptions): void {

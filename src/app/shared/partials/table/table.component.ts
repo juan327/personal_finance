@@ -1,7 +1,8 @@
 import { Component, ContentChild, effect, EventEmitter, inject, input, Input, OnChanges, OnInit, Output, signal, SimpleChanges, TemplateRef } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { DTOPartialTableOptions } from './dto/dtoTable';
+import { DTODictionary, DTOPartialTableOptions } from './dto/dtoTable';
+import { GenericService } from '../../services/generic.service';
 
 @Component({
   selector: 'partial-table',
@@ -21,6 +22,10 @@ export class TableComponent implements OnInit, OnChanges {
 
   @Output() public readonly eventOnChange = new EventEmitter<DTOPartialTableOptions>();
   @Output() public readonly eventOnLoad = new EventEmitter<DTOPartialTableOptions>();
+
+  private readonly _genericService = inject(GenericService);
+  private readonly _localStorage = this._genericService.getDataLocalStorage();
+  public _dictionary: DTODictionary | null = null;
 
   @Input() public _values: any[] = [];
   @Input() public _options: DTOPartialTableOptions = {
@@ -44,21 +49,13 @@ export class TableComponent implements OnInit, OnChanges {
   public _actualPage: number = 1;
   public _totalPages: number = 0;
 
-  private _signal_htmlView = signal<{
-    resume: string
-  }>({
-    resume: '',
-  });
-  public _htmlView = this._signal_htmlView();
+  public _signal_htmlView = signal<string>('');
 
-  constructor()
-  {
-    effect(() => {
-      this._htmlView = this._signal_htmlView();
-    });
+  constructor() {
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.loadDictionary();
   }
 
   ngAfterViewInit(): void {
@@ -69,6 +66,19 @@ export class TableComponent implements OnInit, OnChanges {
 
   }
 
+  private async loadDictionary(): Promise<void> {
+    try {
+      var response = await this._genericService.getDictionary<DTODictionary>(`shared/partials/table/${this._localStorage.language}.json`);
+      if (!response.confirmation) {
+        return;
+      }
+      this._dictionary = response.data;
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+  }
+
   ngOnChanges(simpleChanges: SimpleChanges) {
     const changes = simpleChanges['_values'];
     if (changes) {
@@ -76,7 +86,7 @@ export class TableComponent implements OnInit, OnChanges {
 
       this._listPages = [];
       this._totalPages = this.getTotalPages();
-      if(this._actualPage > this._totalPages && this._totalPages > 0) {
+      if (this._actualPage > this._totalPages && this._totalPages > 0) {
         this.changePage(this._totalPages);
       }
       for (let i = 0; i < this._totalPages; i++) {
@@ -90,7 +100,7 @@ export class TableComponent implements OnInit, OnChanges {
       this._valuesView = this._values;
       return;
     }
-    
+
     this._valuesView = [];
 
     var count: number = 0;
@@ -115,14 +125,14 @@ export class TableComponent implements OnInit, OnChanges {
   }
 
   private getTotalPages(): number {
-    if(this._options.take < 0) {
+    if (this._options.take < 0) {
       return 1;
     }
     return Math.ceil(this._values.length / this._options.take);
   }
 
   public changePage(page: number): void {
-    if(page <= 0 || page > this._totalPages) return;
+    if (page <= 0 || page > this._totalPages) return;
     this._actualPage = page;
     this._options.skip = (page - 1) * this._options.take;
     this.updateResumeHtmlView();
@@ -136,7 +146,11 @@ export class TableComponent implements OnInit, OnChanges {
   }
 
   private updateResumeHtmlView() {
-    this._signal_htmlView.set({ resume: `Mostrando ${this._options.skip + 1} al ${this._options.skip + this._valuesView.length} de ${this._options.total} registros` });
+    if(this._localStorage.language === 'es') {
+      this._signal_htmlView.set(`Mostrando ${this._options.skip + 1} al ${this._options.skip + this._valuesView.length} de ${this._options.total} registros`);
+    } else {
+      this._signal_htmlView.set(`Showing ${this._options.skip + 1} to ${this._options.skip + this._valuesView.length} of ${this._options.total} records`);
+    }
   }
 
   public getKeysOfObject(obj: any): string[] {

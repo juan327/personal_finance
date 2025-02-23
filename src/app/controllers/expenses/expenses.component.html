@@ -1,134 +1,126 @@
-<section>
-    <div class="card">
-        <partial-table [_values]="this._transactions" [_options]="this._partialTableOptions" (eventOnLoad)="this.onLoadPartialTable($event)" (eventOnChange)="this.onChangePartialTable($event)">
-            <ng-template #caption>
-                <div class="caption">
-                    <h2>Historial</h2>
-                    <button type="button" class="btn success" (click)="this.onOpenModal()">Agregar gasto</button>
-                    <input type="text" placeholder="Busqueda rapida..." (input)="this.search($event)">
-                </div>
-            </ng-template>
+@if(this._dictionary !== null) {
+
+    <section>
+        <div class="card">
+            <partial-table [_values]="this._transactions" [_options]="this._partialTableOptions" (eventOnLoad)="this.onLoadPartialTable($event)" (eventOnChange)="this.onChangePartialTable($event)">
+                <ng-template #caption>
+                    <div class="caption">
+                        <h2>{{this._dictionary.cardTable.title}}</h2>
+                        <button type="button" class="btn success" (click)="this.onOpenModal()">{{this._dictionary.cardTable.button}}</button>
+                        <input type="text" [placeholder]="this._dictionary.cardTable.search" (input)="this.search($event)">
+                    </div>
+                </ng-template>
+                <ng-template #header>
+                    <tr>
+                        <th>{{this._dictionary.cardTable.header.category}}</th>
+                        <th>{{this._dictionary.cardTable.header.name}}</th>
+                        <th>{{this._dictionary.cardTable.header.amount}}</th>
+                        <th>{{this._dictionary.cardTable.header.date}}</th>
+                        <th>{{this._dictionary.cardTable.header.created}}</th>
+                        <th>OPC</th>
+                    </tr>
+                </ng-template>
+                <ng-template #body let-item>
+                    <tr>
+                        <td>{{item.categoryName}}</td>
+                        <td>{{item.name}}</td>
+                        <td>
+                            {{this._localStorage.currency}} {{item.amountString}}
+                        </td>
+                        <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                        <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
+                        <td>
+                            <div class="operations">
+                                <button type="button" class="btn primary" [title]="this._dictionary.cardTable.opc.edit" (click)="this.onOpenModal(item)">
+                                    <i class="pi pi-pen-to-square"></i>
+                                </button>  
+                                <button type="button" class="btn danger" [title]="this._dictionary.cardTable.opc.delete" (click)="this.onModalOpenDelete(item)">
+                                    <i class="pi pi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template #bodyMobile let-item>
+                    <ul>
+                        <li><strong>{{this._dictionary.cardTable.header.category}}:</strong> {{item.categoryName}}</li>
+                        <li><strong>{{this._dictionary.cardTable.header.name}}:</strong> {{item.name}}</li>
+                        <li><strong>{{this._dictionary.cardTable.header.amount}}:</strong> {{this._localStorage.currency}} {{item.amountString}}</li>
+                        <li><strong>{{this._dictionary.cardTable.header.date}}:</strong> {{item.date | date: 'dd/MM/yyyy hh:mm a'}}</li>
+                        <li><strong>{{this._dictionary.cardTable.header.created}}:</strong> {{item.created | date: 'dd/MM/yyyy hh:mm a'}}</li>
+                        <li>
+                            <strong>OPC:</strong>
+                            <div class="operations">
+                                <button type="button" class="btn primary" [title]="this._dictionary.cardTable.opc.edit" (click)="this.onOpenModal(item)">
+                                    <i class="pi pi-pen-to-square"></i>
+                                </button>  
+                                <button type="button" class="btn danger" [title]="this._dictionary.cardTable.opc.delete" (click)="this.onModalOpenDelete(item)">
+                                    <i class="pi pi-trash"></i>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                </ng-template>
+            </partial-table>
+        </div>
+    
+        <div class="card">
+            <div id="chart"></div>
+        </div>
+    </section>
+    
+    @if(this._modals.transaction && this._form !== null) {
+    <form [formGroup]="this._form" (ngSubmit)="this.onSubmitForm(this._form)">
+        <partial-modal (eventCloseModal)="this.onCloseModal()">
             <ng-template #header>
-                <tr>
-                    <th>Categoría</th>
-                    <th>Nombre</th>
-                    <th>Monto</th>
-                    <th>Fecha</th>
-                    <!-- <th>Descripción</th> -->
-                    <th>Creación</th>
-                    <th>OPC</th>
-                </tr>
+                <h2>{{this._form.get('opcLabel')?.value}} {{this._dictionary.modalCreate.title}}</h2>
             </ng-template>
-            <ng-template #body let-item>
-                <tr>
-                    <td>{{item.categoryName}}</td>
-                    <td>{{item.name}}</td>
-                    <td>
-                        {{this._localStorage.currency}} {{item.amountString}}
-                    </td>
-                    <td>{{item.date | date: 'dd/MM/yyyy hh:mm a'}}</td>
-                    <!-- <td>{{item.description}}</td> -->
-                    <td>{{item.created | date: 'dd/MM/yyyy hh:mm a'}}</td>
-                    <td>
-                        <div class="operations">
-                            <button type="button" class="btn primary" title="Editar" (click)="this.onOpenModal(item)">
-                                <i class="pi pi-pen-to-square"></i>
-                            </button>  
-                            <button type="button" class="btn danger" title="Eliminar" (click)="this.onModalOpenDelete(item)">
-                                <i class="pi pi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+            <ng-template #body>
+                <div class="form">
+                    <div class="form-group">
+                        <label for="name">{{this._dictionary.modalCreate.name}}</label>
+                        <input type="text" formControlName="name" id="name" name="name" autocomplete="off" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">{{this._dictionary.modalCreate.amount}}</label>
+                        <partial-inputnumber _id="amount" _formControlName="amount" _autocomplete="off" [_form]="this._form" />
+                    </div>
+                    <div class="form-group">
+                        <label for="date">{{this._dictionary.modalCreate.date}}</label>
+                        <partial-inputdatetime _formControlName="date" _autocomplete="off" [_form]="this._form" />
+                    </div>
+                    <div class="form-group">
+                        <label for="category">{{this._dictionary.modalCreate.category}}</label>
+                        <partial-select _formControlName="categoryId" [_options]="this._categories" [_form]="this._form" _label="name" _value="categoryId">
+                            <ng-template #body let-item>
+                                {{item.name}}
+                            </ng-template>
+                        </partial-select>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">{{this._dictionary.modalCreate.description}}</label>
+                        <textarea formControlName="description" id="description" name="description"
+                            autocomplete="off"></textarea>
+                    </div>
+                </div>
             </ng-template>
-            <ng-template #bodyMobile let-item>
-                <ul>
-                    <li><strong>Categoría:</strong> {{item.categoryName}}</li>
-                    <li><strong>Nombre:</strong> {{item.name}}</li>
-                    <li><strong>Monto:</strong> {{this._localStorage.currency}} {{item.amountString}}</li>
-                    <li><strong>Fecha:</strong> {{item.date | date: 'dd/MM/yyyy hh:mm a'}}</li>
-                    <!-- <li><strong>Descripción:</strong> {{item.description}}</li> -->
-                    <li><strong>Creación:</strong> {{item.created | date: 'dd/MM/yyyy hh:mm a'}}</li>
-                    <li>
-                        <strong>OPC:</strong>
-                        <div class="operations">
-                            <button type="button" class="btn primary" title="Editar" (click)="this.onOpenModal(item)">
-                                <i class="pi pi-pen-to-square"></i>
-                            </button>  
-                            <button type="button" class="btn danger" title="Eliminar" (click)="this.onModalOpenDelete(item)">
-                                <i class="pi pi-trash"></i>
-                            </button>
-                        </div>
-                    </li>
-                </ul>
+            <ng-template #footer>
+                <div class="footer">
+                    <button type="submit" class="btn success" [disabled]="this._form.invalid">{{this._form.get('opcLabel')?.value}}</button>
+                </div>
             </ng-template>
-        </partial-table>
-        TOTAL: {{this._totalAmountSignal()}}
-    </div>
-
-    <div class="card">
-        <div id="container"></div>
-    </div>
-</section>
-
-@if(this._modals.transaction && this._form !== null) {
-<form [formGroup]="this._form" (ngSubmit)="this.onSubmitForm(this._form)">
-    <partial-modal (eventCloseModal)="this.onCloseModal()">
-        <ng-template #header>
-            <h2>{{this._form.get('opcLabel')?.value}} gasto</h2>
-        </ng-template>
-        <ng-template #body>
-            <div class="form">
-                <div class="form-group">
-                    <label for="name">Nombre</label>
-                    <input type="text" formControlName="name" id="name" name="name" autocomplete="off" required>
-                </div>
-                <div class="form-group">
-                    <label for="amount">Cantidad</label>
-                    <partial-inputnumber _id="amount" _formControlName="amount" _autocomplete="off" [_form]="this._form" />
-                    <!-- <input type="number" formControlName="amount" id="amount" name="amount" required> -->
-                </div>
-                <div class="form-group">
-                    <label for="date">Fecha</label>
-                    <partial-inputdatetime _formControlName="date" _autocomplete="off" [_form]="this._form" />
-                    <!-- <input type="date" formControlName="date" id="date" name="date" autocomplete="off" required> -->
-                </div>
-                <div class="form-group">
-                    <label for="category">Categoría</label>
-                    <!-- <select formControlName="categoryId" id="category" name="category" required>
-                        @for (item of this._categories; track $index) {
-                        <option [value]="item.categoryId">{{item.name}}</option>
-                        }
-                    </select> -->
-                    <partial-select _formControlName="categoryId" [_options]="this._categories" [_form]="this._form" _label="name" _value="categoryId">
-                        <ng-template #body let-item>
-                            {{item.name}}
-                        </ng-template>
-                    </partial-select>
-                </div>
-                <div class="form-group">
-                    <label for="description">Descripción</label>
-                    <textarea formControlName="description" id="description" name="description"
-                        autocomplete="off"></textarea>
-                </div>
-            </div>
-        </ng-template>
-        <ng-template #footer>
-            <div class="footer">
-                <button type="submit" class="btn success" [disabled]="this._form.invalid">{{this._form.get('opcLabel')?.value}}</button>
-            </div>
-        </ng-template>
-    </partial-modal>
-</form>
-}
-
-@if(this._modals.deleteTransaction && this._selectedTransaction !== null) {
-    <partial-modalconfirmation (eventOnSuccess)="this.onDelete(this._selectedTransaction)" (eventOnCancel)="this._modals.deleteTransaction = false; this._selectedTransaction = null;">
-        <ng-template #header>
-            <h2>Eliminar gasto</h2>
-        </ng-template>
-        <ng-template #body>
-            <h4>¿Está seguro de que desea eliminar el gasto <b>{{this._selectedTransaction.name}}</b>?</h4>
-        </ng-template>
-    </partial-modalconfirmation>
+        </partial-modal>
+    </form>
+    }
+    
+    @if(this._modals.deleteTransaction && this._selectedTransaction !== null) {
+        <partial-modalconfirmation (eventOnSuccess)="this.onDelete(this._selectedTransaction)" (eventOnCancel)="this._modals.deleteTransaction = false; this._selectedTransaction = null;">
+            <ng-template #header>
+                <h2>{{this._dictionary.modalDelete.title}}</h2>
+            </ng-template>
+            <ng-template #body>
+                <h4>{{this._dictionary.modalDelete.body}} <b>{{this._selectedTransaction.name}}</b>?</h4>
+            </ng-template>
+        </partial-modalconfirmation>
+    }
 }

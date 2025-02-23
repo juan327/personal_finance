@@ -1,0 +1,9 @@
+{
+    "title": "Finanzas personales",
+    "menu": {
+        "home": "Resumen",
+        "incomes": "Ingresos",
+        "expenses": "Gastos",
+        "configuration": "Configuración"
+    }
+}
